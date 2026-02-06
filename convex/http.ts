@@ -1,6 +1,7 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
+import { hashApiKey, checkRateLimit, cleanupRateLimits } from "./auth";
 
 const http = httpRouter();
 
@@ -54,7 +55,6 @@ async function authenticateRequest(
   // Basic key format validation
   if (!apiKey.startsWith("fr_key_") || apiKey.length !== 55) return null;
 
-  const { hashApiKey } = await import("./auth.js");
   const keyHash = await hashApiKey(apiKey);
   const keyRecord = await ctx.runQuery(internal.auth.getByKeyHash, { keyHash });
   return keyRecord?.agentId ?? null;
@@ -85,7 +85,6 @@ async function rateLimit(
   maxRequests: number,
   windowMs: number
 ): Promise<boolean> {
-  const { checkRateLimit, cleanupRateLimits } = await import("./auth.js");
   // Lazy cleanup every ~100 requests
   if (Math.random() < 0.01) cleanupRateLimits();
   const ip = getClientIP(request);

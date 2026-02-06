@@ -1,5 +1,6 @@
 import { internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
+import { generateId } from "./auth";
 
 export const create = internalMutation({
   args: {
@@ -12,8 +13,6 @@ export const create = internalMutation({
     deadlineMs: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { generateId } = await import("./auth.js");
-
     // Validate input size (rough check — Convex has a 1MB doc limit)
     const inputStr = JSON.stringify(args.input);
     if (inputStr.length > 102_400) {

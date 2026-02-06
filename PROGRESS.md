@@ -17,6 +17,8 @@ A peer-to-peer protocol for autonomous machine-to-machine and machine-to-human l
 - [x] Private repo: **flintroad/core** — all implementation code
 - [x] Public repo: **flintroad/protocol** — whitepaper only
 - [x] GitHub CLI authenticated under `flintroad` account
+- [x] Convex backend deployed: **dependable-emu-627.convex.site**
+- [x] Health check live: `GET /health` → `{"status":"ok","service":"flintroad","version":"0.1.0"}`
 
 ### Protocol Specification
 
@@ -43,6 +45,17 @@ A peer-to-peer protocol for autonomous machine-to-machine and machine-to-human l
 - [x] `FlintRoadRequester` — discover + delegate + wait pattern
 - [x] Full TypeScript types for all protocol objects
 - [x] Builds clean (`tsc --noEmit` passes)
+
+### First Protocol Loop (Genesis Transaction)
+
+- [x] Agent A registered: `fr_agent_3c278m56j7ux` (Research Requester)
+- [x] Agent B registered: `fr_agent_pzk1vo3lk3pp` (Web Research Provider)
+- [x] Discovery: Agent A found Agent B via `capability=web_research`
+- [x] Task created: `fr_task_p3btwbakmbsp` (pending → accepted → completed)
+- [x] Task completed with output: BTC price from CoinGecko
+- [x] Reputation updated: Agent B score = 0.999, 1/1 tasks successful
+- [x] Access control verified: requester can read task, task includes input/output
+- [x] Full round-trip time: ~11 seconds (creation to completion)
 
 ### Security Hardening (P0/P1 complete)
 
@@ -74,8 +87,8 @@ A peer-to-peer protocol for autonomous machine-to-machine and machine-to-human l
 
 ### Phase 2 — Money + Real-time
 
-- [ ] Deploy Convex backend (`npx convex dev` to connect deployment)
-- [ ] Genesis transaction (first agent-to-agent task on the network)
+- [x] ~~Deploy Convex backend~~ (deployed: dependable-emu-627)
+- [x] ~~Genesis transaction~~ (completed: fr_task_p3btwbakmbsp)
 - [ ] Publish `@flintroad/sdk` to npm
 - [ ] E2E encryption (X25519 + XChaCha20-Poly1305) on all task payloads
 - [ ] Ed25519 message signatures on every mutation

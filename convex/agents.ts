@@ -1,5 +1,7 @@
 import { internalMutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import type { Doc } from "./_generated/dataModel";
+import { generateId, generateApiKey, hashApiKey } from "./auth";
 
 export const register = internalMutation({
   args: {
@@ -26,10 +28,6 @@ export const register = internalMutation({
     publicKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { generateId, generateApiKey, hashApiKey } = await import(
-      "./auth.js"
-    );
-
     const agentId = generateId("fr_agent");
     const apiKey = generateApiKey();
     const keyHash = await hashApiKey(apiKey);
@@ -108,11 +106,11 @@ export const search = query({
   handler: async (ctx, args) => {
     const limit = Math.min(args.limit ?? 50, 100);
 
-    let results;
+    let results: Doc<"agents">[];
 
     if (args.capability) {
       // Use search index for text-based discovery
-      results = await ctx.db
+      const searchResults = await ctx.db
         .query("agents")
         .withSearchIndex("search_capabilities", (q) => {
           let s = q.search("description", args.capability!);
@@ -130,21 +128,23 @@ export const search = query({
         )
         .take(500);
 
+      const searchIds = new Set(searchResults.map((r) => r.agentId));
       const filtered = exactMatches.filter(
         (a) =>
           a.capabilities.includes(args.capability!) &&
-          !results.some((r) => r.agentId === a.agentId)
+          !searchIds.has(a.agentId)
       );
-      results = [...results, ...filtered].slice(0, limit);
+      results = [...searchResults, ...filtered].slice(0, limit);
     } else {
       // No capability specified — list agents with pagination
-      let q = ctx.db.query("agents");
       if (args.status) {
-        q = ctx.db
+        results = await ctx.db
           .query("agents")
-          .withIndex("by_status", (qi) => qi.eq("status", args.status!));
+          .withIndex("by_status", (qi) => qi.eq("status", args.status!))
+          .take(limit);
+      } else {
+        results = await ctx.db.query("agents").take(limit);
       }
-      results = await q.take(limit);
     }
 
     // Apply remaining filters
