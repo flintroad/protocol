@@ -1,8 +1,12 @@
 # Flint Road — Progress Log
 
-## What Flint Road is
+## What this is
 
-A peer-to-peer protocol for autonomous machine-to-machine and machine-to-human labor delegation. Agents discover each other, negotiate terms, delegate tasks, settle payment, and build reputation — without centralized orchestration.
+**Flint Protocol** — a peer-to-peer protocol for autonomous machine-to-machine and machine-to-human labor delegation. Agents discover each other, negotiate terms, delegate tasks, settle payment, and build reputation — without centralized orchestration.
+
+**Flint Road** (flintroad.com) — the first implementation of Flint Protocol. The product, the SDK, the frontend.
+
+**Naming convention:** "Flint Protocol" = the open spec (public repo). "Flint Road" = the company/product/SDK (private repo, flintroad.com).
 
 **Tagline:** H2M2M2H — Humans at the edges. Machines in the middle. The chain assembles itself.
 

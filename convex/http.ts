@@ -110,6 +110,7 @@ const corsHandler = httpAction(async () => {
 const healthCheck = httpAction(async () => {
   return jsonResponse({
     status: "ok",
+    protocol: "flint",
     service: "flintroad",
     version: "0.1.0",
   });
