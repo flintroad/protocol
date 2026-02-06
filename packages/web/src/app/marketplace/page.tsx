@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { searchAgents, type Agent as ApiAgent } from "../../lib/api";
 
 /* ── Types & Data ──────────────────────────────────────────── */
 
@@ -21,7 +22,28 @@ interface Bot {
   online: boolean;
 }
 
-const BOTS: Bot[] = [
+// Convert live API agents to display format
+function apiAgentToBot(agent: ApiAgent): Bot {
+  const isHuman = agent.capabilities.includes("human_relay");
+  const price = agent.metadata?.price as number | undefined;
+  return {
+    id: agent.agentId,
+    name: agent.name,
+    capability: agent.capabilities[0] || "general",
+    type: isHuman ? "human" : "machine",
+    price: price ? `$${price.toFixed(2)}` : "$0.10",
+    priceValue: price ?? 0.10,
+    reputation: agent.reputationScore ?? 0,
+    tasksCompleted: agent.totalTasks ?? 0,
+    avgResponseTime: "—",
+    successRate: agent.totalTasks ? Math.round(((agent.successfulTasks ?? 0) / agent.totalTasks) * 100) : 0,
+    description: (agent.metadata?.description as string) || `${agent.capabilities.join(", ")} provider on the FLINT network.`,
+    earnings: 0,
+    online: agent.status === "active",
+  };
+}
+
+const MOCK_BOTS: Bot[] = [
   {
     id: "b1", name: "deep-scout-7", capability: "web_research", type: "machine",
     price: "$0.10", priceValue: 0.10, reputation: 0.97, tasksCompleted: 4821,
@@ -144,11 +166,11 @@ function BotCard({ bot }: { bot: Bot }) {
   );
 }
 
-function MarketStats() {
+function MarketStats({ liveCount }: { liveCount: number }) {
   return (
     <div className="grid grid-cols-4 gap-4">
       {[
-        { label: "Active Bots", value: "847", sub: "12 new today" },
+        { label: "Active Bots", value: liveCount > 0 ? String(liveCount) : "847", sub: liveCount > 0 ? "live on network" : "12 new today" },
         { label: "Tasks / Hour", value: "2,340", sub: "across all capabilities" },
         { label: "Avg Price", value: "$0.14", sub: "per task" },
         { label: "Total Settled", value: "$24.6K", sub: "this month" },
@@ -170,8 +192,25 @@ export default function MarketplacePage() {
   const [capability, setCapability] = useState("All");
   const [sort, setSort] = useState<SortOption>("reputation");
   const [typeFilter, setTypeFilter] = useState<"all" | "machine" | "human">("all");
+  const [bots, setBots] = useState<Bot[]>(MOCK_BOTS);
+  const [liveCount, setLiveCount] = useState(0);
 
-  let filtered = BOTS.filter((b) => {
+  // Fetch live agents from Convex on mount
+  useEffect(() => {
+    searchAgents({ status: "active", limit: 50 })
+      .then((agents) => {
+        if (agents.length > 0) {
+          const liveBots = agents.map(apiAgentToBot);
+          setBots(liveBots);
+          setLiveCount(agents.length);
+        }
+      })
+      .catch(() => {
+        // Fall back to mock data silently
+      });
+  }, []);
+
+  let filtered = bots.filter((b) => {
     if (capability !== "All" && b.capability !== capability) return false;
     if (typeFilter !== "all" && b.type !== typeFilter) return false;
     if (search && !b.name.includes(search) && !b.capability.includes(search) && !b.description.toLowerCase().includes(search.toLowerCase())) return false;
@@ -210,7 +249,7 @@ export default function MarketplacePage() {
           </p>
         </div>
 
-        <MarketStats />
+        <MarketStats liveCount={liveCount} />
 
         {/* Search + Filters */}
         <div className="mt-8 space-y-3">
@@ -225,7 +264,6 @@ export default function MarketplacePage() {
           </div>
 
           <div className="flex items-center gap-6">
-            {/* Capability filter */}
             <div className="flex gap-1 flex-wrap">
               {CAPABILITIES.map((cap) => (
                 <button
@@ -244,7 +282,6 @@ export default function MarketplacePage() {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Type filter */}
             <div className="flex gap-1">
               {(["all", "machine", "human"] as const).map((t) => (
                 <button
@@ -261,7 +298,6 @@ export default function MarketplacePage() {
               ))}
             </div>
             <div className="h-4 w-px bg-[var(--border)]" />
-            {/* Sort */}
             <div className="flex gap-1">
               {([
                 ["reputation", "Top Rated"],
@@ -287,7 +323,10 @@ export default function MarketplacePage() {
 
         {/* Results */}
         <div className="mt-8">
-          <div className="text-xs text-[var(--muted)] mb-4">{filtered.length} bots found</div>
+          <div className="text-xs text-[var(--muted)] mb-4">
+            {filtered.length} bots found
+            {liveCount > 0 && <span className="text-green-400 ml-2">({liveCount} live from network)</span>}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filtered.map((bot) => (
               <BotCard key={bot.id} bot={bot} />

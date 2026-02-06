@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { registerAgent } from "../../lib/api";
 
 /* ── Data ──────────────────────────────────────────────────── */
 
@@ -100,7 +101,33 @@ function TemplateCard({
 
 function DeployWizard({ template }: { template: (typeof templates)[number] }) {
   const [botName, setBotName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState(template.price);
   const [step, setStep] = useState(1);
+  const [deploying, setDeploying] = useState(false);
+  const [agentId, setAgentId] = useState("");
+  const [apiKey, setApiKey] = useState("");
+  const [error, setError] = useState("");
+
+  async function handleDeploy() {
+    setDeploying(true);
+    setError("");
+    try {
+      const result = await registerAgent({
+        name: botName || `${template.capability}-bot`,
+        capabilities: [template.capability],
+        pricingModel: price,
+        metadata: { description, template: template.name },
+      });
+      setAgentId(result.agentId);
+      setApiKey(result.apiKey);
+      setStep(3);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Deploy failed. Try again.");
+    } finally {
+      setDeploying(false);
+    }
+  }
 
   return (
     <div className="border border-[var(--accent)] rounded-xl overflow-hidden">
@@ -115,7 +142,7 @@ function DeployWizard({ template }: { template: (typeof templates)[number] }) {
             <span>→</span>
             <span className={step >= 2 ? "text-[var(--accent)]" : ""}>Config</span>
             <span>→</span>
-            <span className={step >= 3 ? "text-[var(--accent)]" : ""}>Deploy</span>
+            <span className={step >= 3 ? "text-[var(--accent)]" : ""}>Live</span>
           </div>
         </div>
       </div>
@@ -153,7 +180,8 @@ function DeployWizard({ template }: { template: (typeof templates)[number] }) {
               <label className="block text-xs text-[var(--muted)] mb-1.5">Pricing (per task)</label>
               <input
                 type="text"
-                defaultValue={template.price}
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
                 className="w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] font-mono"
               />
             </div>
@@ -161,10 +189,15 @@ function DeployWizard({ template }: { template: (typeof templates)[number] }) {
               <label className="block text-xs text-[var(--muted)] mb-1.5">Description (what makes your bot special)</label>
               <textarea
                 rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe what your bot does better than the rest..."
                 className="w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] resize-none"
               />
             </div>
+            {error && (
+              <div className="text-sm text-red-400 p-3 bg-red-900/20 rounded">{error}</div>
+            )}
             <div className="flex gap-2">
               <button
                 onClick={() => setStep(1)}
@@ -173,26 +206,42 @@ function DeployWizard({ template }: { template: (typeof templates)[number] }) {
                 Back
               </button>
               <button
-                onClick={() => setStep(3)}
-                className="flex-1 px-4 py-3 bg-[var(--accent)] text-[var(--bg)] font-semibold rounded hover:bg-[var(--accent-dim)] transition-colors"
+                onClick={handleDeploy}
+                disabled={deploying}
+                className="flex-1 px-4 py-3 bg-[var(--accent)] text-[var(--bg)] font-semibold rounded hover:bg-[var(--accent-dim)] transition-colors disabled:opacity-50"
               >
-                Deploy Bot
+                {deploying ? "Deploying..." : "Deploy Bot"}
               </button>
             </div>
           </>
         )}
 
         {step === 3 && (
-          <div className="text-center py-8">
-            <div className="text-4xl mb-4">&#9889;</div>
-            <div className="text-lg font-bold">Bot Deployed!</div>
-            <div className="text-sm text-[var(--muted)] mt-2">
-              <span className="font-mono text-[var(--accent)]">{botName || "my-bot"}</span> is now live on the FLINT network.
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-4xl mb-4">&#9889;</div>
+              <div className="text-lg font-bold">Bot Deployed!</div>
+              <div className="text-sm text-[var(--muted)] mt-2">
+                <span className="font-mono text-[var(--accent)]">{botName || "my-bot"}</span> is live on the FLINT network.
+              </div>
             </div>
-            <div className="text-xs text-[var(--muted)] mt-1">
-              It will start receiving tasks from the marketplace automatically.
+
+            <div className="p-4 bg-[var(--surface)] rounded-lg space-y-3">
+              <div>
+                <div className="text-xs text-[var(--muted)]">AGENT ID</div>
+                <div className="text-sm font-mono text-[var(--accent)] break-all">{agentId}</div>
+              </div>
+              <div>
+                <div className="text-xs text-red-400">API KEY (save this — shown once, never again)</div>
+                <div className="text-sm font-mono text-[var(--fg)] break-all bg-[var(--bg)] p-2 rounded mt-1 border border-[var(--border)]">{apiKey}</div>
+              </div>
             </div>
-            <div className="flex items-center justify-center gap-3 mt-6">
+
+            <div className="text-xs text-[var(--muted)] text-center">
+              Use this API key to accept and complete tasks via the SDK or REST API.
+            </div>
+
+            <div className="flex items-center justify-center gap-3">
               <Link href="/dashboard" className="px-4 py-2 text-sm bg-[var(--accent)] text-[var(--bg)] rounded font-semibold hover:bg-[var(--accent-dim)] transition-colors">
                 View Dashboard
               </Link>
