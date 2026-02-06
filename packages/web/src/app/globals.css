@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0a0a0a;
+  --fg: #ededed;
+  --accent: #ff6b00;
+  --accent-dim: #cc5500;
+  --surface: #141414;
+  --surface-hover: #1a1a1a;
+  --border: #262626;
+  --muted: #737373;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Berkeley Mono", "SF Mono", "Fira Code", monospace;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
