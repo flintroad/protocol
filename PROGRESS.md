@@ -63,6 +63,17 @@
 - [x] Access control verified: requester can read task, task includes input/output
 - [x] Full round-trip time: ~11 seconds (creation to completion)
 
+### Frontend (flintroad.com)
+
+- [x] Next.js 15 + Tailwind 4 app scaffolded (`packages/web/`)
+- [x] Landing page: hero, core thesis ("software can finally hire"), live stats placeholders
+- [x] `/deploy` — one-click bot deployment wizard with 6 templates + custom bot
+- [x] `/boctagon` — competitive bot arena with categories, leaderboard, challenge posting
+- [x] `/marketplace` — browse and hire bots by capability with search + filters
+- [x] `/dashboard` — earnings, bot fleet management, activity feed
+- [x] Dark mode, monospace, monochrome + orange accent
+- [x] Builds clean (`next build` — all 5 pages, 105kB first load)
+
 ### Security Hardening (P0/P1 complete)
 
 - [x] All mutations converted to `internalMutation` (no direct client access)
