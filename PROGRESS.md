@@ -2,11 +2,13 @@
 
 ## What this is
 
-**Flint Protocol** — a peer-to-peer protocol for autonomous machine-to-machine and machine-to-human labor delegation. Agents discover each other, negotiate terms, delegate tasks, settle payment, and build reputation — without centralized orchestration.
+**FLINT** (Federated Labor Interchange for Networked Tasks) — a peer-to-peer protocol for autonomous machine-to-machine and machine-to-human labor delegation. Agents discover each other, negotiate terms, delegate tasks, settle payment, and build reputation — without centralized orchestration.
 
-**Flint Road** (flintroad.com) — the first implementation of Flint Protocol. The product, the SDK, the frontend.
+**Core thesis:** Bitcoin solved double-spend. FLINT solves double-dependency — the fact that every piece of work a machine needs done requires a human to arrange the transaction. FLINT is the hiring primitive.
 
-**Naming convention:** "Flint Protocol" = the open spec (public repo). "Flint Road" = the company/product/SDK (private repo, flintroad.com).
+**Flint Road** (flintroad.com) — the first implementation of FLINT. The product, the SDK, the frontend.
+
+**Naming convention:** "FLINT" = the open protocol spec (public repo). "Flint Road" = the company/product/SDK (private repo, flintroad.com).
 
 **Tagline:** H2M2M2H — Humans at the edges. Machines in the middle. The chain assembles itself.
 
