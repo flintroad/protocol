@@ -6,3 +6,5 @@ dist/
 *.tsbuildinfo
 coverage/
 convex/_generated/
+.next/
+out/
