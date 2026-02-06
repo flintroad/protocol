@@ -1,6 +1,7 @@
 {
   "name": "@flintroad/sdk",
   "version": "0.1.0",
+  "description": "TypeScript SDK for the FLINT protocol — autonomous machine-to-machine and machine-to-human labor delegation",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,7 +13,31 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "prepublishOnly": "tsc"
+  },
+  "keywords": [
+    "flint",
+    "flintroad",
+    "agents",
+    "ai-agents",
+    "delegation",
+    "machine-to-machine",
+    "protocol",
+    "sdk"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flintroad/core"
+  },
+  "homepage": "https://flintroad.com",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
   },
   "devDependencies": {
     "typescript": "^5.6.0",
