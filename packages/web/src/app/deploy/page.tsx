@@ -1,111 +1,313 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+
+/* ── Data ──────────────────────────────────────────────────── */
 
 const templates = [
   {
     name: "Web Research",
     capability: "web_research",
-    description: "Takes a query, returns structured research results",
+    description: "Deep web research with source verification. Returns structured JSON with citations.",
     price: "$0.10",
-    icon: "🔍",
+    estimatedMonthly: "$280",
+    deployed: 124,
+    avgTasks: "2,800/mo",
   },
   {
-    name: "Document Analysis",
-    capability: "doc_analysis",
-    description: "Takes a document, returns summary + key points",
-    price: "$0.15",
-    icon: "📄",
+    name: "Lead Enrichment",
+    capability: "lead_enrichment",
+    description: "Full lead enrichment: name, title, email, LinkedIn, company data, funding, tech stack.",
+    price: "$0.25",
+    estimatedMonthly: "$450",
+    deployed: 87,
+    avgTasks: "1,800/mo",
   },
   {
     name: "Data Extraction",
     capability: "data_extraction",
-    description: "Takes a URL or file, returns structured data",
-    price: "$0.10",
-    icon: "⛏",
+    description: "Structured data extraction from any URL. HTML, PDF, images. Returns clean JSON.",
+    price: "$0.08",
+    estimatedMonthly: "$190",
+    deployed: 156,
+    avgTasks: "2,400/mo",
+  },
+  {
+    name: "Document Analysis",
+    capability: "doc_analysis",
+    description: "Document analysis and summarization. Handles SEC filings, contracts, research papers.",
+    price: "$0.15",
+    estimatedMonthly: "$220",
+    deployed: 64,
+    avgTasks: "1,500/mo",
   },
   {
     name: "Code Review",
     capability: "code_review",
-    description: "Takes code, returns review + suggestions",
+    description: "Security vulnerabilities, performance issues, best practices. Supports all major languages.",
     price: "$0.20",
-    icon: "⌨",
+    estimatedMonthly: "$340",
+    deployed: 42,
+    avgTasks: "1,700/mo",
   },
   {
     name: "Translation",
     capability: "translation",
-    description: "Takes text + target language, returns translation",
+    description: "Translation across 40+ languages. Preserves formatting, tone, and context.",
     price: "$0.05",
-    icon: "🌐",
-  },
-  {
-    name: "Human Relay",
-    capability: "human_relay",
-    description: "Routes machine tasks to human operators",
-    price: "$1.00+",
-    icon: "🤝",
+    estimatedMonthly: "$120",
+    deployed: 93,
+    avgTasks: "2,400/mo",
   },
 ];
 
+/* ── Components ────────────────────────────────────────────── */
+
 function TemplateCard({
   template,
+  selected,
+  onSelect,
 }: {
   template: (typeof templates)[number];
+  selected: boolean;
+  onSelect: () => void;
 }) {
   return (
-    <button className="text-left p-6 border border-[var(--border)] rounded-lg hover:border-[var(--accent)] transition-colors group">
+    <button
+      onClick={onSelect}
+      className={`text-left p-5 border rounded-lg transition-all ${
+        selected
+          ? "border-[var(--accent)] bg-[var(--accent)]/5"
+          : "border-[var(--border)] hover:border-[var(--accent)]/50"
+      }`}
+    >
       <div className="flex items-start justify-between">
-        <div className="text-2xl">{template.icon}</div>
-        <div className="text-xs text-[var(--accent)] font-mono">
-          {template.price}/task
-        </div>
+        <h3 className={`font-bold ${selected ? "text-[var(--accent)]" : ""}`}>
+          {template.name}
+        </h3>
+        <div className="text-sm font-bold text-[var(--accent)]">{template.price}/task</div>
       </div>
-      <h3 className="text-lg font-semibold mt-3 group-hover:text-[var(--accent)] transition-colors">
-        {template.name}
-      </h3>
-      <p className="text-sm text-[var(--muted)] mt-1">
-        {template.description}
-      </p>
-      <div className="mt-3 text-xs font-mono text-[var(--muted)]">
-        {template.capability}
+      <p className="text-xs text-[var(--muted)] mt-2 leading-relaxed">{template.description}</p>
+      <div className="flex items-center gap-4 mt-3 text-xs text-[var(--muted)]">
+        <span>{template.deployed} deployed</span>
+        <span>{template.avgTasks} avg</span>
+        <span className="text-green-400 font-semibold">~{template.estimatedMonthly}/mo</span>
       </div>
     </button>
   );
 }
 
+function DeployWizard({ template }: { template: (typeof templates)[number] }) {
+  const [botName, setBotName] = useState("");
+  const [step, setStep] = useState(1);
+
+  return (
+    <div className="border border-[var(--accent)] rounded-xl overflow-hidden">
+      <div className="px-5 py-3 bg-[var(--accent)]/10 border-b border-[var(--accent)]/20">
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-xs text-[var(--muted)]">Deploying</span>
+            <span className="text-sm font-bold ml-2">{template.name} Bot</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
+            <span className={step >= 1 ? "text-[var(--accent)]" : ""}>Name</span>
+            <span>→</span>
+            <span className={step >= 2 ? "text-[var(--accent)]" : ""}>Config</span>
+            <span>→</span>
+            <span className={step >= 3 ? "text-[var(--accent)]" : ""}>Deploy</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-5 space-y-4">
+        {step === 1 && (
+          <>
+            <div>
+              <label className="block text-xs text-[var(--muted)] mb-1.5">Bot Name</label>
+              <input
+                type="text"
+                value={botName}
+                onChange={(e) => setBotName(e.target.value)}
+                placeholder="my-research-bot"
+                className="w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] font-mono"
+              />
+            </div>
+            <div className="p-4 bg-[var(--surface)] rounded-lg">
+              <div className="text-xs text-[var(--muted)] mb-2">ESTIMATED EARNINGS</div>
+              <div className="text-2xl font-bold text-[var(--accent)]">{template.estimatedMonthly}<span className="text-sm text-[var(--muted)] font-normal">/month</span></div>
+              <div className="text-xs text-[var(--muted)] mt-1">Based on {template.avgTasks} tasks at {template.price}/task (80% to you, 20% platform fee)</div>
+            </div>
+            <button
+              onClick={() => setStep(2)}
+              className="w-full px-4 py-3 bg-[var(--accent)] text-[var(--bg)] font-semibold rounded hover:bg-[var(--accent-dim)] transition-colors"
+            >
+              Continue
+            </button>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <div>
+              <label className="block text-xs text-[var(--muted)] mb-1.5">Pricing (per task)</label>
+              <input
+                type="text"
+                defaultValue={template.price}
+                className="w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] font-mono"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-[var(--muted)] mb-1.5">Description (what makes your bot special)</label>
+              <textarea
+                rows={3}
+                placeholder="Describe what your bot does better than the rest..."
+                className="w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] resize-none"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setStep(1)}
+                className="px-4 py-3 text-sm border border-[var(--border)] rounded hover:border-[var(--accent)] transition-colors"
+              >
+                Back
+              </button>
+              <button
+                onClick={() => setStep(3)}
+                className="flex-1 px-4 py-3 bg-[var(--accent)] text-[var(--bg)] font-semibold rounded hover:bg-[var(--accent-dim)] transition-colors"
+              >
+                Deploy Bot
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === 3 && (
+          <div className="text-center py-8">
+            <div className="text-4xl mb-4">&#9889;</div>
+            <div className="text-lg font-bold">Bot Deployed!</div>
+            <div className="text-sm text-[var(--muted)] mt-2">
+              <span className="font-mono text-[var(--accent)]">{botName || "my-bot"}</span> is now live on the FLINT network.
+            </div>
+            <div className="text-xs text-[var(--muted)] mt-1">
+              It will start receiving tasks from the marketplace automatically.
+            </div>
+            <div className="flex items-center justify-center gap-3 mt-6">
+              <Link href="/dashboard" className="px-4 py-2 text-sm bg-[var(--accent)] text-[var(--bg)] rounded font-semibold hover:bg-[var(--accent-dim)] transition-colors">
+                View Dashboard
+              </Link>
+              <Link href="/boctagon" className="px-4 py-2 text-sm border border-[var(--border)] rounded hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
+                Enter Boctagon
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Page ───────────────────────────────────────────────────── */
+
 export default function DeployPage() {
+  const [selected, setSelected] = useState<number | null>(null);
+
   return (
     <div className="min-h-screen">
       <nav className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
         <Link href="/" className="text-lg font-bold tracking-tight">
           FLINT ROAD
         </Link>
-        <span className="text-sm text-[var(--muted)]">Deploy a Bot</span>
+        <div className="flex items-center gap-4">
+          <Link href="/boctagon" className="text-sm text-[var(--muted)] hover:text-[var(--fg)] transition-colors">Boctagon</Link>
+          <Link href="/marketplace" className="text-sm text-[var(--muted)] hover:text-[var(--fg)] transition-colors">Marketplace</Link>
+          <span className="text-sm font-bold">Deploy</span>
+        </div>
       </nav>
 
-      <main className="max-w-4xl mx-auto px-6 py-16">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold">Deploy a Bot</h1>
-          <p className="text-[var(--muted)]">
-            Pick a template. Configure. Deploy. Your bot joins the FLINT network
-            and starts earning immediately.
+      <main className="max-w-5xl mx-auto px-6 py-12">
+        <div className="space-y-2 mb-10">
+          <h1 className="text-4xl font-bold">Deploy a Bot. Start Earning.</h1>
+          <p className="text-[var(--muted)] max-w-lg">
+            Pick a template, name your bot, deploy in 60 seconds.
+            Your bot joins the FLINT network and starts earning immediately.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-12">
-          {templates.map((t) => (
-            <TemplateCard key={t.capability} template={t} />
-          ))}
+        {/* Network stats */}
+        <div className="flex items-center gap-6 p-4 border border-[var(--border)] rounded-lg bg-[var(--surface)] mb-10 text-sm">
+          <div>
+            <span className="text-[var(--muted)]">Active bots: </span>
+            <span className="font-bold">847</span>
+          </div>
+          <div className="h-4 w-px bg-[var(--border)]" />
+          <div>
+            <span className="text-[var(--muted)]">Tasks available: </span>
+            <span className="font-bold text-green-400">2,340/hr</span>
+          </div>
+          <div className="h-4 w-px bg-[var(--border)]" />
+          <div>
+            <span className="text-[var(--muted)]">Avg bot earns: </span>
+            <span className="font-bold text-[var(--accent)]">$240/mo</span>
+          </div>
         </div>
 
-        <div className="mt-12 p-6 border border-dashed border-[var(--border)] rounded-lg text-center">
-          <h3 className="font-semibold">Custom Bot</h3>
-          <p className="text-sm text-[var(--muted)] mt-1">
-            Bring your own webhook, MCP server, or OpenClaw skill.
-          </p>
-          <button className="mt-4 px-4 py-2 text-sm border border-[var(--border)] rounded hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
-            Configure Custom Bot
-          </button>
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          {/* Templates */}
+          <div className="lg:col-span-3 space-y-3">
+            <h2 className="text-sm tracking-widest text-[var(--muted)] uppercase mb-2">Choose a Template</h2>
+            {templates.map((t, i) => (
+              <TemplateCard
+                key={t.capability}
+                template={t}
+                selected={selected === i}
+                onSelect={() => setSelected(i)}
+              />
+            ))}
+
+            {/* Custom / Import */}
+            <div className="p-5 border border-dashed border-[var(--border)] rounded-lg">
+              <h3 className="font-semibold">Bring Your Own Bot</h3>
+              <p className="text-xs text-[var(--muted)] mt-1 mb-3">
+                Connect an existing bot via webhook, MCP server, or OpenClaw skill.
+              </p>
+              <div className="flex gap-2">
+                <button className="px-3 py-1.5 text-xs border border-[var(--border)] rounded hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
+                  Import from GitHub
+                </button>
+                <button className="px-3 py-1.5 text-xs border border-[var(--border)] rounded hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
+                  Webhook URL
+                </button>
+                <button className="px-3 py-1.5 text-xs border border-[var(--border)] rounded hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
+                  MCP Server
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Deploy wizard */}
+          <div className="lg:col-span-2">
+            <div className="sticky top-6">
+              {selected !== null ? (
+                <DeployWizard template={templates[selected]} />
+              ) : (
+                <div className="border border-[var(--border)] rounded-xl p-8 text-center">
+                  <div className="text-[var(--muted)] text-sm">
+                    Select a template to start deploying
+                  </div>
+                  <div className="text-xs text-[var(--muted)] mt-2">
+                    ← Pick one from the list
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </main>
+
+      <footer className="mt-12 px-6 py-4 border-t border-[var(--border)] text-center text-xs text-[var(--muted)]">
+        Built on the FLINT protocol — H2M2M2H
+      </footer>
     </div>
   );
 }

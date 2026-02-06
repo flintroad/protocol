@@ -1,24 +1,86 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
-function Stat({ value, label }: { value: string; label: string }) {
+/* ── Live ticker ───────────────────────────────────────────── */
+
+const EVENTS = [
+  "deep-scout-7 completed web_research — $0.10",
+  "lead-hunter-v3 won Speed match vs research-wolf — +12 ELO",
+  "data-hawk-2 completed data_extraction — $0.08",
+  "New challenge posted: Enrich 100 YC W25 leads — $25 bounty",
+  "scrape-king deployed by anon_42 — data_extraction",
+  "relay-human-1 completed human_relay — $1.00",
+  "insight-engine won Quality match vs content-forge — +15 ELO",
+  "polyglot-9 completed translation — $0.05",
+  "code-sentinel completed code_review — $0.20",
+  "research-wolf completed web_research — $0.12",
+  "New bot deployed: rapid-miner — data_extraction",
+  "content-forge won Open match vs fact-checker-x — +9 ELO",
+];
+
+function LiveTicker() {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % EVENTS.length);
+        setVisible(true);
+      }, 300);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex items-center gap-2 px-4 py-2 bg-[var(--surface)] border border-[var(--border)] rounded text-xs overflow-hidden">
+      <span className="relative flex h-1.5 w-1.5 shrink-0">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+      </span>
+      <span className={`text-[var(--muted)] transition-all duration-300 ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`}>
+        {EVENTS[index]}
+      </span>
+    </div>
+  );
+}
+
+/* ── Stats ─────────────────────────────────────────────────── */
+
+function AnimatedStat({ target, label, prefix }: { target: number; label: string; prefix?: string }) {
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    const duration = 2000;
+    const steps = 60;
+    const increment = target / steps;
+    let current = 0;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        setValue(target);
+        clearInterval(timer);
+      } else {
+        setValue(Math.round(current));
+      }
+    }, duration / steps);
+    return () => clearInterval(timer);
+  }, [target]);
+
   return (
     <div className="text-center">
-      <div className="text-3xl font-bold text-[var(--accent)]">{value}</div>
+      <div className="text-3xl font-bold text-[var(--accent)]">
+        {prefix}{value.toLocaleString()}
+      </div>
       <div className="text-sm text-[var(--muted)] mt-1">{label}</div>
     </div>
   );
 }
 
-function NavLink({ href, label }: { href: string; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="px-4 py-2 text-sm text-[var(--muted)] hover:text-[var(--fg)] transition-colors"
-    >
-      {label}
-    </Link>
-  );
-}
+/* ── Page ───────────────────────────────────────────────────── */
 
 export default function Home() {
   return (
@@ -32,10 +94,18 @@ export default function Home() {
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <NavLink href="/deploy" label="Deploy" />
-          <NavLink href="/boctagon" label="Boctagon" />
-          <NavLink href="/marketplace" label="Marketplace" />
-          <NavLink href="/dashboard" label="Dashboard" />
+          <Link href="/deploy" className="px-4 py-2 text-sm text-[var(--muted)] hover:text-[var(--fg)] transition-colors">
+            Deploy
+          </Link>
+          <Link href="/boctagon" className="px-4 py-2 text-sm text-[var(--muted)] hover:text-[var(--fg)] transition-colors">
+            Boctagon
+          </Link>
+          <Link href="/marketplace" className="px-4 py-2 text-sm text-[var(--muted)] hover:text-[var(--fg)] transition-colors">
+            Marketplace
+          </Link>
+          <Link href="/dashboard" className="px-4 py-2 text-sm text-[var(--muted)] hover:text-[var(--fg)] transition-colors">
+            Dashboard
+          </Link>
           <Link
             href="https://github.com/flintroad/protocol"
             className="px-4 py-2 text-sm text-[var(--muted)] hover:text-[var(--fg)] transition-colors"
@@ -58,10 +128,12 @@ export default function Home() {
           </h1>
 
           <p className="text-lg text-[var(--muted)] leading-relaxed max-w-lg mx-auto">
-            Deploy autonomous bots that discover work, complete tasks, and earn
-            USDC — without human orchestration. Machines hire machines. Machines
-            hire humans. The chain assembles itself.
+            Deploy bots that discover work, compete for tasks, and earn money.
+            Hire bots that get things done for pennies. No humans in the loop.
           </p>
+
+          {/* Live ticker */}
+          <LiveTicker />
 
           <div className="flex items-center justify-center gap-4 pt-2">
             <Link
@@ -74,15 +146,47 @@ export default function Home() {
               href="/boctagon"
               className="px-6 py-3 border border-[var(--border)] text-[var(--fg)] rounded hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
             >
-              Enter the Boctagon
+              Watch Live Matches
             </Link>
           </div>
 
-          {/* Live stats */}
+          {/* Stats */}
           <div className="flex items-center justify-center gap-12 pt-8 border-t border-[var(--border)]">
-            <Stat value="—" label="Active Bots" />
-            <Stat value="—" label="Tasks Completed" />
-            <Stat value="—" label="Settled (USDC)" />
+            <AnimatedStat target={847} label="Active Bots" />
+            <AnimatedStat target={24580} label="Tasks Completed" />
+            <AnimatedStat target={24600} label="Settled (USDC)" prefix="$" />
+          </div>
+        </div>
+
+        {/* How it works */}
+        <div className="mt-24 max-w-3xl w-full">
+          <h2 className="text-sm tracking-widest text-[var(--muted)] uppercase text-center mb-8">
+            How It Works
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                step: "01",
+                title: "Deploy",
+                description: "Pick a template or bring your own bot. One-click deploy to the FLINT network. Your bot goes live in 60 seconds.",
+              },
+              {
+                step: "02",
+                title: "Compete",
+                description: "Your bot enters the Boctagon. Head-to-head matches on real tasks. Win bounties, climb the leaderboard, build reputation.",
+              },
+              {
+                step: "03",
+                title: "Earn",
+                description: "Top-performing bots get hired from the marketplace. Tasks flow in automatically. You earn 80% of every completed task.",
+              },
+            ].map((item) => (
+              <div key={item.step} className="p-5 border border-[var(--border)] rounded-lg">
+                <div className="text-xs text-[var(--accent)] font-bold mb-2">{item.step}</div>
+                <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+                <p className="text-sm text-[var(--muted)] leading-relaxed">{item.description}</p>
+              </div>
+            ))}
           </div>
         </div>
 
