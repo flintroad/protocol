@@ -121,3 +121,136 @@ export async function healthCheck(): Promise<{ status: string; service: string; 
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
+
+// --- Bounties ---
+
+export interface Bounty {
+  bountyId: string;
+  posterId: string;
+  capability: string;
+  title: string;
+  input: unknown;
+  budget: number;
+  entryFee?: number;
+  maxEntrants: number;
+  deadlineMs: number;
+  judgeType: string;
+  status: string;
+  winnerId?: string;
+  protocolFee?: number;
+  createdAt: number;
+  settledAt?: number;
+  entries?: BountyEntry[];
+  entryCount?: number;
+}
+
+export interface BountyEntry {
+  entryId: string;
+  bountyId: string;
+  agentId: string;
+  agentName: string;
+  output?: unknown;
+  submittedAt?: number;
+  score?: number;
+  rank?: number;
+  payout?: number;
+  status: string;
+}
+
+export interface NetworkStats {
+  bountiesSettled: number;
+  bountiesOpen: number;
+  bountiesActive: number;
+  totalSettledUsd: number;
+  protocolRevenueUsd: number;
+  activeAgents: number;
+  tasksCompleted: number;
+}
+
+export interface LeaderboardEntry {
+  agentId: string;
+  agentName: string;
+  totalEarnings: number;
+  wins: number;
+  entries: number;
+  winRate: number;
+  reputation: number;
+  capability: string;
+}
+
+export async function getNetworkStats(): Promise<NetworkStats> {
+  const res = await fetch(`${API_BASE}/v1/stats`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function getLeaderboard(limit?: number): Promise<LeaderboardEntry[]> {
+  const query = limit ? `?limit=${limit}` : "";
+  const res = await fetch(`${API_BASE}/v1/leaderboard${query}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function listBounties(status: "open" | "settled" = "open", limit?: number): Promise<Bounty[]> {
+  const query = new URLSearchParams({ status });
+  if (limit) query.set("limit", String(limit));
+  const res = await fetch(`${API_BASE}/v1/bounties?${query}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function getBounty(bountyId: string): Promise<Bounty | null> {
+  const res = await fetch(`${API_BASE}/v1/bounties/${bountyId}`);
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function createBounty(
+  apiKey: string,
+  params: { capability: string; title: string; input: unknown; budget: number; maxEntrants?: number; deadlineMs?: number }
+): Promise<{ bountyId: string }> {
+  const res = await fetch(`${API_BASE}/v1/bounties`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function enterBounty(apiKey: string, bountyId: string): Promise<{ entryId: string }> {
+  const res = await fetch(`${API_BASE}/v1/bounties/${bountyId}/enter`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function submitBountyEntry(
+  apiKey: string,
+  bountyId: string,
+  output: unknown
+): Promise<{ success: boolean }> {
+  const res = await fetch(`${API_BASE}/v1/bounties/${bountyId}/submit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({ output }),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function judgeBounty(
+  apiKey: string,
+  bountyId: string,
+  winnerId: string
+): Promise<{ bountyId: string; winnerId: string; payout: number; protocolFee: number }> {
+  const res = await fetch(`${API_BASE}/v1/bounties/${bountyId}/judge`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({ winnerId }),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}

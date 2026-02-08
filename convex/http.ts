@@ -369,6 +369,129 @@ const getReputation = httpAction(async (ctx, request) => {
   return jsonResponse(score);
 });
 
+// --- Bounties ---
+
+const createBounty = httpAction(async (ctx, request) => {
+  const callerId = await authenticateRequest(ctx, request);
+  if (!callerId) return errorResponse("Unauthorized", 401);
+
+  try {
+    const body = await request.json();
+    const result = await ctx.runMutation(internal.bounties.create, {
+      posterId: callerId,
+      capability: body.capability,
+      title: body.title,
+      input: body.input,
+      budget: body.budget,
+      entryFee: body.entryFee,
+      maxEntrants: body.maxEntrants,
+      deadlineMs: body.deadlineMs,
+      judgeType: body.judgeType,
+    });
+    return jsonResponse(result, 201);
+  } catch (e) {
+    return errorResponse(safeErrorMessage(e, "Bounty creation failed"), 400);
+  }
+});
+
+const listBounties = httpAction(async (ctx, request) => {
+  const url = new URL(request.url);
+  const status = url.searchParams.get("status") ?? "open";
+  const limitStr = url.searchParams.get("limit");
+  const limit = limitStr ? parseInt(limitStr, 10) : undefined;
+
+  try {
+    let results;
+    if (status === "settled") {
+      results = await ctx.runQuery(api.bounties.listSettled, { limit });
+    } else {
+      results = await ctx.runQuery(api.bounties.listOpen, { limit });
+    }
+    return jsonResponse(results);
+  } catch (e) {
+    return errorResponse(safeErrorMessage(e, "Failed to list bounties"), 400);
+  }
+});
+
+const getBounty = httpAction(async (ctx, request) => {
+  const segments = extractSubPath(request.url, "/v1/bounties/");
+  const bountyId = segments[0];
+  if (!bountyId) return errorResponse("Missing bounty ID", 400);
+
+  // Handle sub-routes
+  const action = segments[1];
+
+  if (action === "entries") {
+    const entries = await ctx.runQuery(api.bounties.getEntries, { bountyId });
+    return jsonResponse(entries);
+  }
+
+  const bounty = await ctx.runQuery(api.bounties.get, { bountyId });
+  if (!bounty) return errorResponse("Bounty not found", 404);
+  return jsonResponse(bounty);
+});
+
+const bountyAction = httpAction(async (ctx, request) => {
+  const segments = extractSubPath(request.url, "/v1/bounties/");
+  const bountyId = segments[0];
+  const action = segments[1];
+
+  if (!bountyId || !action) return errorResponse("Invalid path", 400);
+  if (!["enter", "submit", "judge"].includes(action)) return errorResponse("Unknown action", 400);
+
+  const callerId = await authenticateRequest(ctx, request);
+  if (!callerId) return errorResponse("Unauthorized", 401);
+
+  try {
+    let result;
+    switch (action) {
+      case "enter": {
+        result = await ctx.runMutation(internal.bounties.enter, {
+          bountyId,
+          agentId: callerId,
+        });
+        break;
+      }
+      case "submit": {
+        const body = await request.json();
+        result = await ctx.runMutation(internal.bounties.submit, {
+          bountyId,
+          agentId: callerId,
+          output: body.output,
+        });
+        break;
+      }
+      case "judge": {
+        const body = await request.json();
+        result = await ctx.runMutation(internal.bounties.judge, {
+          bountyId,
+          callerId,
+          winnerId: body.winnerId,
+          scores: body.scores,
+        });
+        break;
+      }
+    }
+    return jsonResponse(result);
+  } catch (e) {
+    return errorResponse(safeErrorMessage(e, "Action failed"), 400);
+  }
+});
+
+const getNetworkStats = httpAction(async (ctx) => {
+  const stats = await ctx.runQuery(api.bounties.networkStats, {});
+  return jsonResponse(stats);
+});
+
+const getLeaderboard = httpAction(async (ctx, request) => {
+  const url = new URL(request.url);
+  const limitStr = url.searchParams.get("limit");
+  const results = await ctx.runQuery(api.bounties.leaderboard, {
+    limit: limitStr ? parseInt(limitStr, 10) : undefined,
+  });
+  return jsonResponse(results);
+});
+
 // --- Capabilities ---
 
 const listCapabilities = httpAction(async (ctx, request) => {
@@ -826,6 +949,20 @@ http.route({
   method: "GET",
   handler: getReputation,
 });
+
+// Bounties
+http.route({ path: "/v1/bounties", method: "OPTIONS", handler: corsHandler });
+http.route({ path: "/v1/bounties", method: "POST", handler: createBounty });
+http.route({ path: "/v1/bounties", method: "GET", handler: listBounties });
+http.route({ pathPrefix: "/v1/bounties/", method: "OPTIONS", handler: corsHandler });
+http.route({ pathPrefix: "/v1/bounties/", method: "GET", handler: getBounty });
+http.route({ pathPrefix: "/v1/bounties/", method: "POST", handler: bountyAction });
+
+// Stats & Leaderboard
+http.route({ path: "/v1/stats", method: "OPTIONS", handler: corsHandler });
+http.route({ path: "/v1/stats", method: "GET", handler: getNetworkStats });
+http.route({ path: "/v1/leaderboard", method: "OPTIONS", handler: corsHandler });
+http.route({ path: "/v1/leaderboard", method: "GET", handler: getLeaderboard });
 
 // Capabilities
 http.route({ path: "/v1/capabilities", method: "OPTIONS", handler: corsHandler });

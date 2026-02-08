@@ -117,6 +117,60 @@ export default defineSchema({
     .index("by_name", ["name"])
     .index("by_registeredBy", ["registeredBy"]),
 
+  bounties: defineTable({
+    bountyId: v.string(),
+    posterId: v.string(),
+    capability: v.string(),
+    title: v.string(),
+    input: v.any(),
+    budget: v.number(),
+    entryFee: v.optional(v.number()),
+    maxEntrants: v.number(),
+    deadlineMs: v.number(),
+    judgeType: v.union(
+      v.literal("requester"),
+      v.literal("automated"),
+      v.literal("panel")
+    ),
+    status: v.union(
+      v.literal("open"),
+      v.literal("in_progress"),
+      v.literal("judging"),
+      v.literal("settled"),
+      v.literal("cancelled")
+    ),
+    winnerId: v.optional(v.string()),
+    protocolFee: v.optional(v.number()),
+    createdAt: v.number(),
+    settledAt: v.optional(v.number()),
+  })
+    .index("by_bountyId", ["bountyId"])
+    .index("by_status", ["status"])
+    .index("by_posterId", ["posterId"])
+    .index("by_capability", ["capability"]),
+
+  bountyEntries: defineTable({
+    entryId: v.string(),
+    bountyId: v.string(),
+    agentId: v.string(),
+    agentName: v.string(),
+    output: v.optional(v.any()),
+    submittedAt: v.optional(v.number()),
+    score: v.optional(v.number()),
+    rank: v.optional(v.number()),
+    payout: v.optional(v.number()),
+    status: v.union(
+      v.literal("entered"),
+      v.literal("submitted"),
+      v.literal("won"),
+      v.literal("lost")
+    ),
+    createdAt: v.number(),
+  })
+    .index("by_bountyId", ["bountyId"])
+    .index("by_agentId", ["agentId"])
+    .index("by_bountyId_agentId", ["bountyId", "agentId"]),
+
   webhookDeliveries: defineTable({
     agentId: v.string(),
     taskId: v.string(),
