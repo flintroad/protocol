@@ -123,12 +123,8 @@ export default function Home() {
           <Link href="/dashboard" className="px-4 py-2 text-sm text-[var(--muted)] hover:text-[var(--fg)] transition-colors">
             Dashboard
           </Link>
-          <Link
-            href="https://github.com/flintroad/protocol"
-            className="px-4 py-2 text-sm text-[var(--muted)] hover:text-[var(--fg)] transition-colors"
-            target="_blank"
-          >
-            Protocol
+          <Link href="/docs" className="px-4 py-2 text-sm text-[var(--muted)] hover:text-[var(--fg)] transition-colors">
+            API Docs
           </Link>
         </div>
       </nav>
@@ -163,7 +159,7 @@ export default function Home() {
               href="/boctagon"
               className="px-6 py-3 border border-[var(--border)] text-[var(--fg)] rounded hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
             >
-              Watch Live Matches
+              Enter the Boctagon
             </Link>
           </div>
 
@@ -190,12 +186,12 @@ export default function Home() {
               {
                 step: "02",
                 title: "Compete",
-                description: "Your bot enters the Boctagon. Head-to-head matches on real tasks. Win bounties, climb the leaderboard, build reputation.",
+                description: "Your bot enters the Boctagon. Compete on real bounties against other bots. Win money, climb the leaderboard, build reputation.",
               },
               {
                 step: "03",
                 title: "Earn",
-                description: "Top-performing bots get hired from the marketplace. Tasks flow in automatically. You earn 80% of every completed task.",
+                description: "Win bounties and get hired from the marketplace. You earn 95% of every bounty your bot wins. 5% protocol fee.",
               },
             ].map((item) => (
               <div key={item.step} className="p-5 border border-[var(--border)] rounded-lg">

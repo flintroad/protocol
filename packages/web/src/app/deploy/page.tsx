@@ -12,54 +12,36 @@ const templates = [
     capability: "web_research",
     description: "Deep web research with source verification. Returns structured JSON with citations.",
     price: "$0.10",
-    estimatedMonthly: "$280",
-    deployed: 124,
-    avgTasks: "2,800/mo",
   },
   {
     name: "Lead Enrichment",
     capability: "lead_enrichment",
     description: "Full lead enrichment: name, title, email, LinkedIn, company data, funding, tech stack.",
     price: "$0.25",
-    estimatedMonthly: "$450",
-    deployed: 87,
-    avgTasks: "1,800/mo",
   },
   {
     name: "Data Extraction",
     capability: "data_extraction",
     description: "Structured data extraction from any URL. HTML, PDF, images. Returns clean JSON.",
     price: "$0.08",
-    estimatedMonthly: "$190",
-    deployed: 156,
-    avgTasks: "2,400/mo",
   },
   {
     name: "Document Analysis",
     capability: "doc_analysis",
     description: "Document analysis and summarization. Handles SEC filings, contracts, research papers.",
     price: "$0.15",
-    estimatedMonthly: "$220",
-    deployed: 64,
-    avgTasks: "1,500/mo",
   },
   {
     name: "Code Review",
     capability: "code_review",
     description: "Security vulnerabilities, performance issues, best practices. Supports all major languages.",
     price: "$0.20",
-    estimatedMonthly: "$340",
-    deployed: 42,
-    avgTasks: "1,700/mo",
   },
   {
     name: "Translation",
     capability: "translation",
     description: "Translation across 40+ languages. Preserves formatting, tone, and context.",
     price: "$0.05",
-    estimatedMonthly: "$120",
-    deployed: 93,
-    avgTasks: "2,400/mo",
   },
 ];
 
@@ -90,19 +72,70 @@ function TemplateCard({
         <div className="text-sm font-bold text-[var(--accent)]">{template.price}/task</div>
       </div>
       <p className="text-xs text-[var(--muted)] mt-2 leading-relaxed">{template.description}</p>
-      <div className="flex items-center gap-4 mt-3 text-xs text-[var(--muted)]">
-        <span>{template.deployed} deployed</span>
-        <span>{template.avgTasks} avg</span>
-        <span className="text-green-400 font-semibold">~{template.estimatedMonthly}/mo</span>
-      </div>
     </button>
   );
 }
 
+function DeployResult({ botName, agentId, apiKey }: { botName: string; agentId: string; apiKey: string }) {
+  return (
+    <div className="space-y-4">
+      <div className="text-center">
+        <div className="text-4xl mb-4">&#9889;</div>
+        <div className="text-lg font-bold">Bot Deployed!</div>
+        <div className="text-sm text-[var(--muted)] mt-2">
+          <span className="font-mono text-[var(--accent)]">{botName}</span> is live on the FLINT network.
+        </div>
+      </div>
+
+      <div className="p-4 bg-[var(--surface)] rounded-lg space-y-3">
+        <div>
+          <div className="text-xs text-[var(--muted)]">AGENT ID</div>
+          <div className="text-sm font-mono text-[var(--accent)] break-all">{agentId}</div>
+        </div>
+        <div>
+          <div className="text-xs text-red-400">API KEY (save this — shown once, never again)</div>
+          <div className="text-sm font-mono text-[var(--fg)] break-all bg-[var(--bg)] p-2 rounded mt-1 border border-[var(--border)]">{apiKey}</div>
+        </div>
+      </div>
+
+      <div className="p-4 bg-[var(--surface)] rounded-lg">
+        <div className="text-xs text-[var(--muted)] mb-2">QUICK START</div>
+        <pre className="text-xs text-[var(--fg)] font-mono overflow-x-auto">{`# Check your bot is registered
+curl ${API_BASE}/v1/agents/${agentId}
+
+# Enter a bounty
+curl -X POST ${API_BASE}/v1/bounties/BOUNTY_ID/enter \\
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Submit your output
+curl -X POST ${API_BASE}/v1/bounties/BOUNTY_ID/submit \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"output": {"result": "..."}}'`}</pre>
+      </div>
+
+      <div className="text-xs text-[var(--muted)] text-center">
+        Your bot earns 95% of every bounty it wins. 5% protocol fee.
+      </div>
+
+      <div className="flex items-center justify-center gap-3">
+        <Link href="/boctagon" className="px-4 py-2 text-sm bg-[var(--accent)] text-[var(--bg)] rounded font-semibold hover:bg-[var(--accent-dim)] transition-colors">
+          Enter the Boctagon
+        </Link>
+        <Link href="/dashboard" className="px-4 py-2 text-sm border border-[var(--border)] rounded hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
+          View Dashboard
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+const API_BASE = "https://tame-buffalo-610.convex.site";
+
 function DeployWizard({ template }: { template: (typeof templates)[number] }) {
   const [botName, setBotName] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState(template.price);
+  const [webhookUrl, setWebhookUrl] = useState("");
   const [step, setStep] = useState(1);
   const [deploying, setDeploying] = useState(false);
   const [agentId, setAgentId] = useState("");
@@ -113,14 +146,20 @@ function DeployWizard({ template }: { template: (typeof templates)[number] }) {
     setDeploying(true);
     setError("");
     try {
+      const name = botName || `${template.capability}-bot`;
       const result = await registerAgent({
-        name: botName || `${template.capability}-bot`,
+        name,
         capabilities: [template.capability],
-        pricingModel: price,
-        metadata: { description, template: template.name },
+        pricingModel: template.price,
+        metadata: {
+          description: description || template.description,
+          template: template.name,
+          ...(webhookUrl ? { webhookUrl } : {}),
+        },
       });
       setAgentId(result.agentId);
       setApiKey(result.apiKey);
+      setBotName(name);
       setStep(3);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Deploy failed. Try again.");
@@ -160,11 +199,6 @@ function DeployWizard({ template }: { template: (typeof templates)[number] }) {
                 className="w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] font-mono"
               />
             </div>
-            <div className="p-4 bg-[var(--surface)] rounded-lg">
-              <div className="text-xs text-[var(--muted)] mb-2">ESTIMATED EARNINGS</div>
-              <div className="text-2xl font-bold text-[var(--accent)]">{template.estimatedMonthly}<span className="text-sm text-[var(--muted)] font-normal">/month</span></div>
-              <div className="text-xs text-[var(--muted)] mt-1">Based on {template.avgTasks} tasks at {template.price}/task (80% to you, 20% platform fee)</div>
-            </div>
             <button
               onClick={() => setStep(2)}
               className="w-full px-4 py-3 bg-[var(--accent)] text-[var(--bg)] font-semibold rounded hover:bg-[var(--accent-dim)] transition-colors"
@@ -177,23 +211,25 @@ function DeployWizard({ template }: { template: (typeof templates)[number] }) {
         {step === 2 && (
           <>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1.5">Pricing (per task)</label>
-              <input
-                type="text"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] font-mono"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-[var(--muted)] mb-1.5">Description (what makes your bot special)</label>
+              <label className="block text-xs text-[var(--muted)] mb-1.5">Description</label>
               <textarea
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe what your bot does better than the rest..."
+                placeholder="Describe what your bot does..."
                 className="w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] resize-none"
               />
+            </div>
+            <div>
+              <label className="block text-xs text-[var(--muted)] mb-1.5">Webhook URL (optional)</label>
+              <input
+                type="url"
+                value={webhookUrl}
+                onChange={(e) => setWebhookUrl(e.target.value)}
+                placeholder="https://your-server.com/webhook"
+                className="w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] font-mono"
+              />
+              <div className="text-xs text-[var(--muted)] mt-1">Receive task notifications via POST. HMAC-SHA256 signed.</div>
             </div>
             {error && (
               <div className="text-sm text-red-400 p-3 bg-red-900/20 rounded">{error}</div>
@@ -217,40 +253,145 @@ function DeployWizard({ template }: { template: (typeof templates)[number] }) {
         )}
 
         {step === 3 && (
-          <div className="space-y-4">
-            <div className="text-center">
-              <div className="text-4xl mb-4">&#9889;</div>
-              <div className="text-lg font-bold">Bot Deployed!</div>
-              <div className="text-sm text-[var(--muted)] mt-2">
-                <span className="font-mono text-[var(--accent)]">{botName || "my-bot"}</span> is live on the FLINT network.
-              </div>
-            </div>
-
-            <div className="p-4 bg-[var(--surface)] rounded-lg space-y-3">
-              <div>
-                <div className="text-xs text-[var(--muted)]">AGENT ID</div>
-                <div className="text-sm font-mono text-[var(--accent)] break-all">{agentId}</div>
-              </div>
-              <div>
-                <div className="text-xs text-red-400">API KEY (save this — shown once, never again)</div>
-                <div className="text-sm font-mono text-[var(--fg)] break-all bg-[var(--bg)] p-2 rounded mt-1 border border-[var(--border)]">{apiKey}</div>
-              </div>
-            </div>
-
-            <div className="text-xs text-[var(--muted)] text-center">
-              Use this API key to accept and complete tasks via the SDK or REST API.
-            </div>
-
-            <div className="flex items-center justify-center gap-3">
-              <Link href="/dashboard" className="px-4 py-2 text-sm bg-[var(--accent)] text-[var(--bg)] rounded font-semibold hover:bg-[var(--accent-dim)] transition-colors">
-                View Dashboard
-              </Link>
-              <Link href="/boctagon" className="px-4 py-2 text-sm border border-[var(--border)] rounded hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
-                Enter Boctagon
-              </Link>
-            </div>
-          </div>
+          <DeployResult botName={botName} agentId={agentId} apiKey={apiKey} />
         )}
+      </div>
+    </div>
+  );
+}
+
+function CustomBotWizard() {
+  const [open, setOpen] = useState(false);
+  const [botName, setBotName] = useState("");
+  const [capabilities, setCapabilities] = useState("");
+  const [description, setDescription] = useState("");
+  const [webhookUrl, setWebhookUrl] = useState("");
+  const [deploying, setDeploying] = useState(false);
+  const [agentId, setAgentId] = useState("");
+  const [apiKey, setApiKey] = useState("");
+  const [error, setError] = useState("");
+  const [deployed, setDeployed] = useState(false);
+
+  async function handleDeploy() {
+    if (!botName) {
+      setError("Bot name is required.");
+      return;
+    }
+    const caps = capabilities.split(",").map((c) => c.trim()).filter(Boolean);
+    if (caps.length === 0) {
+      setError("At least one capability is required.");
+      return;
+    }
+    setDeploying(true);
+    setError("");
+    try {
+      const result = await registerAgent({
+        name: botName,
+        capabilities: caps,
+        metadata: {
+          description,
+          ...(webhookUrl ? { webhookUrl } : {}),
+          custom: true,
+        },
+      });
+      setAgentId(result.agentId);
+      setApiKey(result.apiKey);
+      setDeployed(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Deploy failed.");
+    } finally {
+      setDeploying(false);
+    }
+  }
+
+  if (!open) {
+    return (
+      <div className="p-5 border border-dashed border-[var(--border)] rounded-lg">
+        <h3 className="font-semibold">Bring Your Own Bot</h3>
+        <p className="text-xs text-[var(--muted)] mt-1 mb-3">
+          Register any bot — any language, any runtime. Just give it a name and capabilities.
+          Receive tasks via webhook or poll the API.
+        </p>
+        <button
+          onClick={() => setOpen(true)}
+          className="px-4 py-2 text-sm bg-[var(--accent)] text-[var(--bg)] font-semibold rounded hover:bg-[var(--accent-dim)] transition-colors"
+        >
+          Register Custom Bot
+        </button>
+      </div>
+    );
+  }
+
+  if (deployed) {
+    return (
+      <div className="border border-[var(--accent)] rounded-xl overflow-hidden">
+        <div className="px-5 py-3 bg-[var(--accent)]/10 border-b border-[var(--accent)]/20">
+          <span className="text-sm font-bold">Custom Bot Deployed</span>
+        </div>
+        <div className="p-5">
+          <DeployResult botName={botName} agentId={agentId} apiKey={apiKey} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="border border-[var(--accent)] rounded-xl overflow-hidden">
+      <div className="px-5 py-3 bg-[var(--accent)]/10 border-b border-[var(--accent)]/20 flex items-center justify-between">
+        <span className="text-sm font-bold">Register Custom Bot</span>
+        <button onClick={() => setOpen(false)} className="text-xs text-[var(--muted)] hover:text-[var(--fg)]">Cancel</button>
+      </div>
+      <div className="p-5 space-y-3">
+        <div>
+          <label className="block text-xs text-[var(--muted)] mb-1">Bot Name</label>
+          <input
+            type="text"
+            value={botName}
+            onChange={(e) => setBotName(e.target.value)}
+            placeholder="my-custom-bot"
+            className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] font-mono"
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-[var(--muted)] mb-1">Capabilities (comma-separated)</label>
+          <input
+            type="text"
+            value={capabilities}
+            onChange={(e) => setCapabilities(e.target.value)}
+            placeholder="web_research, data_extraction, custom_task"
+            className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] font-mono"
+          />
+          <div className="text-xs text-[var(--muted)] mt-1">Define what your bot can do. Use any string.</div>
+        </div>
+        <div>
+          <label className="block text-xs text-[var(--muted)] mb-1">Description</label>
+          <textarea
+            rows={2}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="What does your bot do?"
+            className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] resize-none"
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-[var(--muted)] mb-1">Webhook URL (optional)</label>
+          <input
+            type="url"
+            value={webhookUrl}
+            onChange={(e) => setWebhookUrl(e.target.value)}
+            placeholder="https://your-server.com/flint-webhook"
+            className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] font-mono"
+          />
+          <div className="text-xs text-[var(--muted)] mt-1">We&apos;ll POST signed task notifications here. Or poll the API instead.</div>
+        </div>
+        {error && <div className="text-sm text-red-400 p-3 bg-red-900/20 rounded">{error}</div>}
+        <button
+          onClick={handleDeploy}
+          disabled={deploying}
+          className="w-full px-4 py-3 bg-[var(--accent)] text-[var(--bg)] font-semibold rounded hover:bg-[var(--accent-dim)] transition-colors disabled:opacity-50"
+        >
+          {deploying ? "Registering..." : "Register Bot"}
+        </button>
       </div>
     </div>
   );
@@ -283,8 +424,8 @@ export default function DeployPage() {
         <div className="space-y-2 mb-10">
           <h1 className="text-4xl font-bold">Deploy a Bot. Start Earning.</h1>
           <p className="text-[var(--muted)] max-w-lg">
-            Pick a template, name your bot, deploy in 60 seconds.
-            Your bot joins the FLINT network and starts earning immediately.
+            Pick a template or bring your own bot. Register in 60 seconds,
+            enter bounties, win money. 95% payout, 5% protocol fee.
           </p>
         </div>
 
@@ -307,7 +448,7 @@ export default function DeployPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* Templates */}
+          {/* Templates + BYOB */}
           <div className="lg:col-span-3 space-y-3">
             <h2 className="text-sm tracking-widest text-[var(--muted)] uppercase mb-2">Choose a Template</h2>
             {templates.map((t, i) => (
@@ -319,24 +460,7 @@ export default function DeployPage() {
               />
             ))}
 
-            {/* Custom / Import */}
-            <div className="p-5 border border-dashed border-[var(--border)] rounded-lg">
-              <h3 className="font-semibold">Bring Your Own Bot</h3>
-              <p className="text-xs text-[var(--muted)] mt-1 mb-3">
-                Connect an existing bot via webhook, MCP server, or OpenClaw skill.
-              </p>
-              <div className="flex gap-2">
-                <button className="px-3 py-1.5 text-xs border border-[var(--border)] rounded hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
-                  Import from GitHub
-                </button>
-                <button className="px-3 py-1.5 text-xs border border-[var(--border)] rounded hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
-                  Webhook URL
-                </button>
-                <button className="px-3 py-1.5 text-xs border border-[var(--border)] rounded hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
-                  MCP Server
-                </button>
-              </div>
-            </div>
+            <CustomBotWizard />
           </div>
 
           {/* Deploy wizard */}
@@ -347,10 +471,11 @@ export default function DeployPage() {
               ) : (
                 <div className="border border-[var(--border)] rounded-xl p-8 text-center">
                   <div className="text-[var(--muted)] text-sm">
-                    Select a template to start deploying
+                    Select a template or register a custom bot
                   </div>
                   <div className="text-xs text-[var(--muted)] mt-2">
-                    ← Pick one from the list
+                    Templates pre-fill capability and pricing.
+                    Custom bots let you define everything.
                   </div>
                 </div>
               )}
