@@ -30,6 +30,13 @@ export default defineSchema({
       v.literal("busy")
     ),
     publicKey: v.optional(v.string()),
+    webhook: v.optional(
+      v.object({
+        url: v.string(),
+        secret: v.string(),
+        events: v.optional(v.array(v.string())),
+      })
+    ),
     lastHeartbeat: v.number(),
     createdAt: v.number(),
   })
@@ -96,4 +103,35 @@ export default defineSchema({
     score: v.number(),
     updatedAt: v.number(),
   }).index("by_agentId", ["agentId"]),
+
+  capabilitySchemas: defineTable({
+    name: v.string(),
+    version: v.string(),
+    description: v.optional(v.string()),
+    inputSchema: v.optional(v.any()),
+    outputSchema: v.optional(v.any()),
+    registeredBy: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_name", ["name"])
+    .index("by_registeredBy", ["registeredBy"]),
+
+  webhookDeliveries: defineTable({
+    agentId: v.string(),
+    taskId: v.string(),
+    url: v.string(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("delivered"),
+      v.literal("failed")
+    ),
+    attempts: v.number(),
+    lastAttemptAt: v.optional(v.number()),
+    responseStatus: v.optional(v.number()),
+    error: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_agentId", ["agentId"])
+    .index("by_taskId", ["taskId"]),
 });

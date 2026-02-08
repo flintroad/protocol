@@ -16,6 +16,15 @@ export interface AgentInfrastructure {
   uptimeSla?: number;
 }
 
+export interface AgentWebhook {
+  /** HTTPS URL to receive task notifications */
+  url: string;
+  /** Shared secret for HMAC-SHA256 signature verification (min 16 chars) */
+  secret: string;
+  /** Event filter — omit for all events. Supported: "task.created" */
+  events?: string[];
+}
+
 export interface AgentRegistration {
   name: string;
   type: AgentType;
@@ -25,6 +34,7 @@ export interface AgentRegistration {
   pricing?: AgentPricing;
   infrastructure?: AgentInfrastructure;
   publicKey?: string;
+  webhook?: AgentWebhook;
 }
 
 export interface Agent extends AgentRegistration {

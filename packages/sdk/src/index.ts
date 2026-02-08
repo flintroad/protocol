@@ -9,6 +9,7 @@ export type {
   AgentRegistration,
   AgentPricing,
   AgentInfrastructure,
+  AgentWebhook,
   AgentSearchParams,
   RegisterResult,
   Task,

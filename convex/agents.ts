@@ -26,6 +26,13 @@ export const register = internalMutation({
       })
     ),
     publicKey: v.optional(v.string()),
+    webhook: v.optional(
+      v.object({
+        url: v.string(),
+        secret: v.string(),
+        events: v.optional(v.array(v.string())),
+      })
+    ),
   },
   handler: async (ctx, args) => {
     const agentId = generateId("fr_agent");
@@ -42,6 +49,19 @@ export const register = internalMutation({
       if (cap.length > 64) throw new Error("Capability name too long (max 64)");
     }
 
+    // Validate webhook URL if provided
+    if (args.webhook) {
+      try {
+        const u = new URL(args.webhook.url);
+        if (u.protocol !== "https:") throw new Error("Webhook URL must use HTTPS");
+      } catch (e) {
+        if (e instanceof Error && e.message.includes("HTTPS")) throw e;
+        throw new Error("Invalid webhook URL");
+      }
+      if (args.webhook.secret.length < 16)
+        throw new Error("Webhook secret must be at least 16 characters");
+    }
+
     await ctx.db.insert("agents", {
       agentId,
       name: args.name,
@@ -54,6 +74,7 @@ export const register = internalMutation({
       pricing: args.pricing,
       infrastructure: args.infrastructure,
       publicKey: args.publicKey,
+      webhook: args.webhook,
       status: "online",
       lastHeartbeat: now,
       createdAt: now,
@@ -187,6 +208,13 @@ export const update = internalMutation({
         uptimeSla: v.optional(v.number()),
       })
     ),
+    webhook: v.optional(
+      v.object({
+        url: v.string(),
+        secret: v.string(),
+        events: v.optional(v.array(v.string())),
+      })
+    ),
   },
   handler: async (ctx, args) => {
     if (args.callerAgentId !== args.agentId) {
@@ -207,6 +235,19 @@ export const update = internalMutation({
     if (args.description !== undefined && args.description.length > 512)
       throw new Error("Description too long");
 
+    // Validate webhook if provided
+    if (args.webhook) {
+      try {
+        const u = new URL(args.webhook.url);
+        if (u.protocol !== "https:") throw new Error("Webhook URL must use HTTPS");
+      } catch (e) {
+        if (e instanceof Error && e.message.includes("HTTPS")) throw e;
+        throw new Error("Invalid webhook URL");
+      }
+      if (args.webhook.secret.length < 16)
+        throw new Error("Webhook secret must be at least 16 characters");
+    }
+
     const updates: Record<string, unknown> = {
       lastHeartbeat: Date.now(),
     };
@@ -220,6 +261,7 @@ export const update = internalMutation({
     if (args.pricing !== undefined) updates.pricing = args.pricing;
     if (args.infrastructure !== undefined)
       updates.infrastructure = args.infrastructure;
+    if (args.webhook !== undefined) updates.webhook = args.webhook;
 
     await ctx.db.patch(agent._id, updates);
 
