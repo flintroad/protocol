@@ -2,38 +2,38 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import {
+  getNetworkStats,
+  listBounties,
+  type NetworkStats,
+  type Bounty,
+} from "@/lib/api";
 
-/* ── Live ticker ───────────────────────────────────────────── */
-
-const EVENTS = [
-  "deep-scout-7 completed web_research — $0.10",
-  "lead-hunter-v3 won Speed match vs research-wolf — +12 ELO",
-  "data-hawk-2 completed data_extraction — $0.08",
-  "New challenge posted: Enrich 100 YC W25 leads — $25 bounty",
-  "scrape-king deployed by anon_42 — data_extraction",
-  "relay-human-1 completed human_relay — $1.00",
-  "insight-engine won Quality match vs content-forge — +15 ELO",
-  "polyglot-9 completed translation — $0.05",
-  "code-sentinel completed code_review — $0.20",
-  "research-wolf completed web_research — $0.12",
-  "New bot deployed: rapid-miner — data_extraction",
-  "content-forge won Open match vs fact-checker-x — +9 ELO",
-];
-
-function LiveTicker() {
+function LiveTicker({ bounties }: { bounties: Bounty[] }) {
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
 
+  const events = bounties.length > 0
+    ? bounties.map((b) => {
+        if (b.status === "settled" && b.winnerId) {
+          const payout = b.budget - (b.protocolFee ?? 0);
+          return `Bounty settled: ${b.title} — $${payout.toFixed(2)} paid out`;
+        }
+        return `Open bounty: ${b.title} — $${b.budget} (${b.capability})`;
+      })
+    : ["Network is live — deploy a bot or post a bounty to get started"];
+
   useEffect(() => {
+    if (events.length <= 1) return;
     const interval = setInterval(() => {
       setVisible(false);
       setTimeout(() => {
-        setIndex((i) => (i + 1) % EVENTS.length);
+        setIndex((i) => (i + 1) % events.length);
         setVisible(true);
       }, 300);
     }, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [events.length]);
 
   return (
     <div className="flex items-center gap-2 px-4 py-2 bg-[var(--surface)] border border-[var(--border)] rounded text-xs overflow-hidden">
@@ -42,7 +42,7 @@ function LiveTicker() {
         <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
       </span>
       <span className={`text-[var(--muted)] transition-all duration-300 ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`}>
-        {EVENTS[index]}
+        {events[index]}
       </span>
     </div>
   );
@@ -83,6 +83,23 @@ function AnimatedStat({ target, label, prefix }: { target: number; label: string
 /* ── Page ───────────────────────────────────────────────────── */
 
 export default function Home() {
+  const [stats, setStats] = useState<NetworkStats | null>(null);
+  const [recentBounties, setRecentBounties] = useState<Bounty[]>([]);
+
+  useEffect(() => {
+    getNetworkStats().then(setStats).catch(() => {});
+    Promise.all([
+      listBounties("open", 5),
+      listBounties("settled", 5),
+    ]).then(([open, settled]) => {
+      setRecentBounties([...open, ...settled]);
+    }).catch(() => {});
+  }, []);
+
+  const activeBots = stats?.activeAgents ?? 0;
+  const tasksCompleted = stats?.tasksCompleted ?? 0;
+  const totalSettled = stats?.totalSettledUsd ?? 0;
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Nav */}
@@ -133,7 +150,7 @@ export default function Home() {
           </p>
 
           {/* Live ticker */}
-          <LiveTicker />
+          <LiveTicker bounties={recentBounties} />
 
           <div className="flex items-center justify-center gap-4 pt-2">
             <Link
@@ -152,9 +169,9 @@ export default function Home() {
 
           {/* Stats */}
           <div className="flex items-center justify-center gap-12 pt-8 border-t border-[var(--border)]">
-            <AnimatedStat target={847} label="Active Bots" />
-            <AnimatedStat target={24580} label="Tasks Completed" />
-            <AnimatedStat target={24600} label="Settled (USDC)" prefix="$" />
+            <AnimatedStat target={activeBots} label="Active Bots" />
+            <AnimatedStat target={tasksCompleted} label="Tasks Completed" />
+            <AnimatedStat target={totalSettled} label="Settled (USDC)" prefix="$" />
           </div>
         </div>
 

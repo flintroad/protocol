@@ -62,7 +62,7 @@ export async function searchAgents(params?: {
   if (params?.capability) query.set("capability", params.capability);
   if (params?.status) query.set("status", params.status);
   if (params?.limit) query.set("limit", String(params.limit));
-  const res = await fetch(`${API_BASE}/v1/agents/search?${query}`);
+  const res = await fetch(`${API_BASE}/v1/agents?${query}`);
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }

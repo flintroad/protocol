@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { searchAgents, type Agent as ApiAgent } from "../../lib/api";
+import {
+  searchAgents,
+  getNetworkStats,
+  type Agent as ApiAgent,
+  type NetworkStats,
+} from "../../lib/api";
 
 /* ── Types & Data ──────────────────────────────────────────── */
 
@@ -39,74 +44,11 @@ function apiAgentToBot(agent: ApiAgent): Bot {
     successRate: agent.totalTasks ? Math.round(((agent.successfulTasks ?? 0) / agent.totalTasks) * 100) : 0,
     description: (agent.metadata?.description as string) || `${agent.capabilities.join(", ")} provider on the FLINT network.`,
     earnings: 0,
-    online: agent.status === "active",
+    online: agent.status === "online",
   };
 }
 
-const MOCK_BOTS: Bot[] = [
-  {
-    id: "b1", name: "deep-scout-7", capability: "web_research", type: "machine",
-    price: "$0.10", priceValue: 0.10, reputation: 0.97, tasksCompleted: 4821,
-    avgResponseTime: "2.3s", successRate: 97, description: "Deep web research with source verification. Returns structured JSON with citations.",
-    earnings: 2840, online: true,
-  },
-  {
-    id: "b2", name: "lead-hunter-v3", capability: "lead_enrichment", type: "machine",
-    price: "$0.25", priceValue: 0.25, reputation: 0.95, tasksCompleted: 3247,
-    avgResponseTime: "4.1s", successRate: 95, description: "Full lead enrichment: name, title, email, LinkedIn, company data, funding, tech stack.",
-    earnings: 2150, online: true,
-  },
-  {
-    id: "b3", name: "data-hawk-2", capability: "data_extraction", type: "machine",
-    price: "$0.08", priceValue: 0.08, reputation: 0.94, tasksCompleted: 6103,
-    avgResponseTime: "1.8s", successRate: 94, description: "Structured data extraction from any URL. HTML, PDF, images. Returns clean JSON.",
-    earnings: 1420, online: true,
-  },
-  {
-    id: "b4", name: "insight-engine", capability: "doc_analysis", type: "machine",
-    price: "$0.15", priceValue: 0.15, reputation: 0.93, tasksCompleted: 2890,
-    avgResponseTime: "5.7s", successRate: 93, description: "Document analysis and summarization. Handles SEC filings, contracts, research papers.",
-    earnings: 980, online: true,
-  },
-  {
-    id: "b5", name: "code-sentinel", capability: "code_review", type: "machine",
-    price: "$0.20", priceValue: 0.20, reputation: 0.91, tasksCompleted: 1567,
-    avgResponseTime: "8.2s", successRate: 91, description: "Automated code review. Security vulnerabilities, performance issues, best practices.",
-    earnings: 650, online: false,
-  },
-  {
-    id: "b6", name: "polyglot-9", capability: "translation", type: "machine",
-    price: "$0.05", priceValue: 0.05, reputation: 0.96, tasksCompleted: 8432,
-    avgResponseTime: "1.2s", successRate: 96, description: "Translation across 40+ languages. Preserves formatting, tone, and context.",
-    earnings: 430, online: true,
-  },
-  {
-    id: "b7", name: "content-forge", capability: "content_gen", type: "machine",
-    price: "$0.12", priceValue: 0.12, reputation: 0.89, tasksCompleted: 2103,
-    avgResponseTime: "6.4s", successRate: 89, description: "Content generation: blog posts, social copy, product descriptions. SEO-optimized.",
-    earnings: 740, online: true,
-  },
-  {
-    id: "b8", name: "relay-human-1", capability: "human_relay", type: "human",
-    price: "$1.00", priceValue: 1.00, reputation: 0.99, tasksCompleted: 892,
-    avgResponseTime: "4m 12s", successRate: 99, description: "Human-verified tasks. Complex judgment calls, nuanced research, creative work.",
-    earnings: 1890, online: true,
-  },
-  {
-    id: "b9", name: "scrape-king", capability: "data_extraction", type: "machine",
-    price: "$0.06", priceValue: 0.06, reputation: 0.92, tasksCompleted: 9847,
-    avgResponseTime: "0.9s", successRate: 92, description: "High-speed web scraping. Handles JS-rendered pages. Rate-limit aware.",
-    earnings: 1190, online: true,
-  },
-  {
-    id: "b10", name: "research-wolf", capability: "web_research", type: "machine",
-    price: "$0.12", priceValue: 0.12, reputation: 0.94, tasksCompleted: 3562,
-    avgResponseTime: "3.1s", successRate: 94, description: "Competitive intelligence, market research, trend analysis. Multi-source synthesis.",
-    earnings: 1680, online: true,
-  },
-];
-
-const CAPABILITIES = ["All", "web_research", "lead_enrichment", "data_extraction", "doc_analysis", "code_review", "translation", "content_gen", "human_relay"];
+const STATIC_CAPABILITIES = ["All", "web_research", "lead_enrichment", "data_extraction", "doc_analysis", "code_review", "translation", "content_gen", "human_relay"];
 
 type SortOption = "reputation" | "cheapest" | "fastest" | "most_used";
 
@@ -166,19 +108,24 @@ function BotCard({ bot }: { bot: Bot }) {
   );
 }
 
-function MarketStats({ liveCount }: { liveCount: number }) {
+function MarketStats({ stats, liveCount }: { stats: NetworkStats | null; liveCount: number }) {
+  const s = stats;
+  const activeBots = liveCount > 0 ? String(liveCount) : String(s?.activeAgents ?? 0);
+  const bounties = s ? String(s.bountiesOpen + s.bountiesActive) : "0";
+  const settled = s ? `$${s.totalSettledUsd.toLocaleString()}` : "$0";
+
   return (
     <div className="grid grid-cols-4 gap-4">
       {[
-        { label: "Active Bots", value: liveCount > 0 ? String(liveCount) : "847", sub: liveCount > 0 ? "live on network" : "12 new today" },
-        { label: "Tasks / Hour", value: "2,340", sub: "across all capabilities" },
-        { label: "Avg Price", value: "$0.14", sub: "per task" },
-        { label: "Total Settled", value: "$24.6K", sub: "this month" },
-      ].map((s) => (
-        <div key={s.label} className="p-4 border border-[var(--border)] rounded-lg bg-[var(--surface)]">
-          <div className="text-xs text-[var(--muted)] uppercase tracking-wider">{s.label}</div>
-          <div className="text-xl font-bold mt-1">{s.value}</div>
-          <div className="text-xs text-[var(--muted)] mt-0.5">{s.sub}</div>
+        { label: "Active Bots", value: activeBots, sub: "live on network" },
+        { label: "Open Bounties", value: bounties, sub: "accepting entries" },
+        { label: "Tasks Done", value: String(s?.tasksCompleted ?? 0), sub: "total completed" },
+        { label: "Total Settled", value: settled, sub: "bounties paid out" },
+      ].map((item) => (
+        <div key={item.label} className="p-4 border border-[var(--border)] rounded-lg bg-[var(--surface)]">
+          <div className="text-xs text-[var(--muted)] uppercase tracking-wider">{item.label}</div>
+          <div className="text-xl font-bold mt-1">{item.value}</div>
+          <div className="text-xs text-[var(--muted)] mt-0.5">{item.sub}</div>
         </div>
       ))}
     </div>
@@ -192,22 +139,27 @@ export default function MarketplacePage() {
   const [capability, setCapability] = useState("All");
   const [sort, setSort] = useState<SortOption>("reputation");
   const [typeFilter, setTypeFilter] = useState<"all" | "machine" | "human">("all");
-  const [bots, setBots] = useState<Bot[]>(MOCK_BOTS);
+  const [bots, setBots] = useState<Bot[]>([]);
   const [liveCount, setLiveCount] = useState(0);
+  const [stats, setStats] = useState<NetworkStats | null>(null);
+  const [capabilities, setCapabilities] = useState<string[]>(STATIC_CAPABILITIES);
 
-  // Fetch live agents from Convex on mount
   useEffect(() => {
-    searchAgents({ status: "active", limit: 50 })
+    getNetworkStats().then(setStats).catch(() => {});
+
+    searchAgents({ status: "online", limit: 50 })
       .then((agents) => {
-        if (agents.length > 0) {
-          const liveBots = agents.map(apiAgentToBot);
-          setBots(liveBots);
-          setLiveCount(agents.length);
+        const liveBots = agents.map(apiAgentToBot);
+        setBots(liveBots);
+        setLiveCount(agents.length);
+
+        // Build capability list from real agents
+        const caps = new Set(agents.flatMap((a) => a.capabilities));
+        if (caps.size > 0) {
+          setCapabilities(["All", ...Array.from(caps).sort()]);
         }
       })
-      .catch(() => {
-        // Fall back to mock data silently
-      });
+      .catch(() => {});
   }, []);
 
   let filtered = bots.filter((b) => {
@@ -249,7 +201,7 @@ export default function MarketplacePage() {
           </p>
         </div>
 
-        <MarketStats liveCount={liveCount} />
+        <MarketStats stats={stats} liveCount={liveCount} />
 
         {/* Search + Filters */}
         <div className="mt-8 space-y-3">
@@ -265,7 +217,7 @@ export default function MarketplacePage() {
 
           <div className="flex items-center gap-6">
             <div className="flex gap-1 flex-wrap">
-              {CAPABILITIES.map((cap) => (
+              {capabilities.map((cap) => (
                 <button
                   key={cap}
                   onClick={() => setCapability(cap)}
@@ -327,11 +279,26 @@ export default function MarketplacePage() {
             {filtered.length} bots found
             {liveCount > 0 && <span className="text-green-400 ml-2">({liveCount} live from network)</span>}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filtered.map((bot) => (
-              <BotCard key={bot.id} bot={bot} />
-            ))}
-          </div>
+          {filtered.length === 0 ? (
+            <div className="border border-dashed border-[var(--border)] rounded-lg p-12 text-center">
+              <div className="text-lg font-bold mb-2">No bots on the network yet</div>
+              <p className="text-sm text-[var(--muted)] max-w-md mx-auto mb-4">
+                Be the first to deploy. Your bot shows up here automatically once it&apos;s registered and online.
+              </p>
+              <Link
+                href="/deploy"
+                className="inline-block px-4 py-2 text-sm bg-[var(--accent)] text-[var(--bg)] font-semibold rounded hover:bg-[var(--accent-dim)] transition-colors"
+              >
+                Deploy a Bot
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filtered.map((bot) => (
+                <BotCard key={bot.id} bot={bot} />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* CTA */}
