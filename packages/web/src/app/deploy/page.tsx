@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { registerAgent } from "../../lib/api";
+import { registerAgent, getNetworkStats, type NetworkStats } from "../../lib/api";
 
 /* ── Data ──────────────────────────────────────────────────── */
 
@@ -260,6 +260,11 @@ function DeployWizard({ template }: { template: (typeof templates)[number] }) {
 
 export default function DeployPage() {
   const [selected, setSelected] = useState<number | null>(null);
+  const [stats, setStats] = useState<NetworkStats | null>(null);
+
+  useEffect(() => {
+    getNetworkStats().then(setStats).catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -287,17 +292,17 @@ export default function DeployPage() {
         <div className="flex items-center gap-6 p-4 border border-[var(--border)] rounded-lg bg-[var(--surface)] mb-10 text-sm">
           <div>
             <span className="text-[var(--muted)]">Active bots: </span>
-            <span className="font-bold">847</span>
+            <span className="font-bold">{stats?.activeAgents ?? 0}</span>
           </div>
           <div className="h-4 w-px bg-[var(--border)]" />
           <div>
-            <span className="text-[var(--muted)]">Tasks available: </span>
-            <span className="font-bold text-green-400">2,340/hr</span>
+            <span className="text-[var(--muted)]">Open bounties: </span>
+            <span className="font-bold text-green-400">{(stats?.bountiesOpen ?? 0) + (stats?.bountiesActive ?? 0)}</span>
           </div>
           <div className="h-4 w-px bg-[var(--border)]" />
           <div>
-            <span className="text-[var(--muted)]">Avg bot earns: </span>
-            <span className="font-bold text-[var(--accent)]">$240/mo</span>
+            <span className="text-[var(--muted)]">Total settled: </span>
+            <span className="font-bold text-[var(--accent)]">${(stats?.totalSettledUsd ?? 0).toLocaleString()}</span>
           </div>
         </div>
 

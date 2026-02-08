@@ -6,6 +6,7 @@ import {
   getNetworkStats,
   getLeaderboard,
   listBounties,
+  createBounty,
   type NetworkStats,
   type LeaderboardEntry,
   type Bounty,
@@ -90,7 +91,7 @@ function OpenBounties({ bounties }: { bounties: Bounty[] }) {
         const minsLeft = Math.floor((timeLeft % 3600_000) / 60_000);
 
         return (
-          <div key={b.bountyId} className="flex items-center justify-between p-4 border border-[var(--border)] rounded-lg hover:border-[var(--accent)] transition-colors group">
+          <Link key={b.bountyId} href={`/boctagon/${b.bountyId}`} className="flex items-center justify-between p-4 border border-[var(--border)] rounded-lg hover:border-[var(--accent)] transition-colors group block">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs px-2 py-0.5 rounded bg-[var(--surface)] text-[var(--accent)]">{b.capability}</span>
@@ -109,7 +110,7 @@ function OpenBounties({ bounties }: { bounties: Bounty[] }) {
                 <div className="text-xs text-[var(--muted)]">bounty</div>
               </div>
             </div>
-          </div>
+          </Link>
         );
       })}
     </div>
@@ -201,6 +202,170 @@ function Leaderboard({ entries }: { entries: LeaderboardEntry[] }) {
   );
 }
 
+function PostBountyForm({ onPosted }: { onPosted: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [capability, setCapability] = useState("web_research");
+  const [title, setTitle] = useState("");
+  const [input, setInput] = useState("");
+  const [budget, setBudget] = useState("");
+  const [maxEntrants, setMaxEntrants] = useState("10");
+  const [deadlineHours, setDeadlineHours] = useState("1");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  async function handleSubmit() {
+    if (!apiKey || !title || !budget) {
+      setError("API key, title, and budget are required.");
+      return;
+    }
+    setSubmitting(true);
+    setError("");
+    setSuccess("");
+    try {
+      const result = await createBounty(apiKey, {
+        capability,
+        title,
+        input: input ? JSON.parse(input) : { prompt: title },
+        budget: parseFloat(budget),
+        maxEntrants: parseInt(maxEntrants) || 10,
+        deadlineMs: Date.now() + (parseFloat(deadlineHours) || 1) * 3600_000,
+      });
+      setSuccess(`Bounty posted: ${result.bountyId}`);
+      setTitle("");
+      setInput("");
+      setBudget("");
+      onPosted();
+    } catch (err) {
+      if (input) {
+        try { JSON.parse(input); } catch {
+          setError("Invalid JSON in input field.");
+          setSubmitting(false);
+          return;
+        }
+      }
+      setError(err instanceof Error ? err.message : "Failed to post bounty.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="px-4 py-2 text-sm bg-[var(--accent)] text-[var(--bg)] font-semibold rounded hover:bg-[var(--accent-dim)] transition-colors"
+      >
+        Post a Bounty
+      </button>
+    );
+  }
+
+  return (
+    <div className="border border-[var(--accent)] rounded-xl overflow-hidden">
+      <div className="px-5 py-3 bg-[var(--accent)]/10 border-b border-[var(--accent)]/20 flex items-center justify-between">
+        <span className="text-sm font-bold">Post a Bounty</span>
+        <button onClick={() => setOpen(false)} className="text-xs text-[var(--muted)] hover:text-[var(--fg)]">Close</button>
+      </div>
+      <div className="p-5 space-y-3">
+        <div>
+          <label className="block text-xs text-[var(--muted)] mb-1">Your API Key</label>
+          <input
+            type="password"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder="fr_key_..."
+            className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] font-mono"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs text-[var(--muted)] mb-1">Capability</label>
+            <select
+              value={capability}
+              onChange={(e) => setCapability(e.target.value)}
+              className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] focus:outline-none focus:border-[var(--accent)]"
+            >
+              {["web_research", "lead_enrichment", "data_extraction", "doc_analysis", "code_review", "translation", "content_gen"].map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs text-[var(--muted)] mb-1">Budget (USD)</label>
+            <input
+              type="number"
+              value={budget}
+              onChange={(e) => setBudget(e.target.value)}
+              placeholder="25.00"
+              min="0.01"
+              step="0.01"
+              className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] font-mono"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-xs text-[var(--muted)] mb-1">Title</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enrich 100 YC W25 leads with emails"
+            className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)]"
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-[var(--muted)] mb-1">Input (JSON, optional)</label>
+          <textarea
+            rows={3}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder='{"urls": ["https://..."], "format": "csv"}'
+            className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] font-mono resize-none"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs text-[var(--muted)] mb-1">Max Entrants</label>
+            <input
+              type="number"
+              value={maxEntrants}
+              onChange={(e) => setMaxEntrants(e.target.value)}
+              min="2"
+              max="50"
+              className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] focus:outline-none focus:border-[var(--accent)] font-mono"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-[var(--muted)] mb-1">Deadline (hours)</label>
+            <input
+              type="number"
+              value={deadlineHours}
+              onChange={(e) => setDeadlineHours(e.target.value)}
+              min="0.5"
+              step="0.5"
+              className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded text-sm text-[var(--fg)] focus:outline-none focus:border-[var(--accent)] font-mono"
+            />
+          </div>
+        </div>
+        {error && <div className="text-sm text-red-400 p-3 bg-red-900/20 rounded">{error}</div>}
+        {success && <div className="text-sm text-green-400 p-3 bg-green-900/20 rounded">{success}</div>}
+        <button
+          onClick={handleSubmit}
+          disabled={submitting}
+          className="w-full px-4 py-3 bg-[var(--accent)] text-[var(--bg)] font-semibold rounded hover:bg-[var(--accent-dim)] transition-colors disabled:opacity-50"
+        >
+          {submitting ? "Posting..." : `Post Bounty — $${budget || "0"}`}
+        </button>
+        <div className="text-xs text-[var(--muted)] text-center">
+          5% protocol fee on settlement. You pick the winner.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Page ───────────────────────────────────────────────────── */
 
 export default function BoctagonPage() {
@@ -209,14 +374,15 @@ export default function BoctagonPage() {
   const [settledBounties, setSettledBounties] = useState<Bounty[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
 
-  useEffect(() => {
-    // Load all data
+  function refresh() {
     getNetworkStats().then(setStats).catch(() => {});
     listBounties("open", 20).then(setOpenBounties).catch(() => {});
     listBounties("settled", 10).then(setSettledBounties).catch(() => {});
     getLeaderboard(20).then(setLeaderboard).catch(() => {});
+  }
 
-    // Poll stats every 10s
+  useEffect(() => {
+    refresh();
     const interval = setInterval(() => {
       getNetworkStats().then(setStats).catch(() => {});
       listBounties("open", 20).then(setOpenBounties).catch(() => {});
@@ -250,6 +416,11 @@ export default function BoctagonPage() {
 
         {/* Live Stats — all real */}
         <StatsBar stats={stats} />
+
+        {/* Post Bounty Form */}
+        <div className="mt-10">
+          <PostBountyForm onPosted={refresh} />
+        </div>
 
         {/* Open Bounties */}
         <div className="mt-10">
