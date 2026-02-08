@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flint Road — Brand Guidelines (v2 Design System)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-deep: #050508;
+  --bg: #0a0a0f;
+  --bg-raised: #0f0f16;
+  --surface: #12121a;
+  --surface-hover: #18182a;
+  --surface-inset: #0c0c14;
+  --border: #1e1e2e;
+  --border-hover: #2a2a3e;
+  --border-glow: rgba(255,107,0,0.15);
+  --fg: #ededed;
+  --fg-dim: #a0a0b0;
+  --muted: #5a5a70;
+  --accent: #ff6b00;
+  --accent-bright: #ff8a33;
+  --accent-glow: rgba(255,107,0,0.3);
+  --cyan: #00e5ff;
+  --cyan-glow: rgba(0,229,255,0.2);
+  --magenta: #ff2d7b;
+  --magenta-glow: rgba(255,45,123,0.2);
+  --success: #00ff88;
+  --error: #ff3b3b;
+  --warning: #ffc107;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --font-code: 'JetBrains Mono', monospace;
+  --font-accent: 'Orbitron', sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: var(--bg-deep); }
+
+/* ─── LAYOUT ─── */
+.page { max-width: 1200px; margin: 0 auto; padding: 48px 32px; }
+
+.header {
+  text-align: center;
+  padding: 80px 32px 48px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 64px;
+}
+
+.header-title {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 12px;
+}
+
+.header-sub {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.header-version {
+  display: inline-block;
+  margin-top: 16px;
+  font-family: var(--font-code);
+  font-size: 11px;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+
+section {
+  margin-bottom: 80px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.section-desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 32px;
+  max-width: 600px;
+}
+
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 64px 0;
+}
+
+/* ─── COLOR SWATCHES ─── */
+.swatch-group {
+  margin-bottom: 32px;
+}
+
+.swatch-group-title {
+  font-family: var(--font-code);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.swatch-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.swatch {
+  width: 140px;
+}
+
+.swatch-color {
+  width: 100%;
+  height: 80px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.swatch-color.glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  box-shadow: inset 0 0 20px currentColor;
+  opacity: 0.3;
+}
+
+.swatch-name {
+  font-family: var(--font-code);
+  font-size: 11px;
+  margin-top: 8px;
+  color: var(--fg);
+}
+
+.swatch-value {
+  font-family: var(--font-code);
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ─── TYPOGRAPHY SAMPLES ─── */
+.type-sample {
+  margin-bottom: 40px;
+  padding: 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.type-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.type-font-name {
+  font-family: var(--font-code);
+  font-size: 11px;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.type-css-var {
+  font-family: var(--font-code);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.type-usage {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-dim);
+  margin-bottom: 20px;
+}
+
+.type-display {
+  margin-bottom: 8px;
+}
+
+.type-sizes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.type-sizes .size-label {
+  font-family: var(--font-code);
+  font-size: 10px;
+  color: var(--muted);
+  min-width: 60px;
+  display: inline-block;
+}
+
+/* ─── COMPONENT EXAMPLES ─── */
+.component-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.component-card {
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.component-label {
+  font-family: var(--font-code);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+/* Buttons */
+.btn-glow {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 12px 28px;
+  background: var(--accent);
+  color: var(--bg-deep);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow: 0 0 20px var(--accent-glow), 0 0 60px rgba(255,107,0,0.1);
+}
+
+.btn-glow:hover {
+  background: var(--accent-bright);
+  transform: scale(1.02);
+  box-shadow: 0 0 30px var(--accent-glow), 0 0 80px rgba(255,107,0,0.15);
+}
+
+.btn-glow:active { transform: scale(0.98); }
+
+.btn-glow.cyan {
+  background: var(--cyan);
+  box-shadow: 0 0 20px var(--cyan-glow), 0 0 60px rgba(0,229,255,0.1);
+}
+
+.btn-glow.magenta {
+  background: var(--magenta);
+  box-shadow: 0 0 20px var(--magenta-glow), 0 0 60px rgba(255,45,123,0.1);
+}
+
+.btn-outline {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 12px 28px;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.btn-outline:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(255,107,0,0.05);
+}
+
+/* Glow Cards */
+.glow-card-demo {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.glow-card-demo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.glow-card-demo.orange::before { background: radial-gradient(circle at 50% 0%, var(--accent-glow), transparent 70%); }
+.glow-card-demo.cyan::before { background: radial-gradient(circle at 50% 0%, var(--cyan-glow), transparent 70%); }
+.glow-card-demo.magenta::before { background: radial-gradient(circle at 50% 0%, var(--magenta-glow), transparent 70%); }
+
+.glow-card-demo:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-hover);
+}
+
+.glow-card-demo.orange:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 20px var(--accent-glow); }
+.glow-card-demo.cyan:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 20px var(--cyan-glow); }
+.glow-card-demo.magenta:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 20px var(--magenta-glow); }
+
+.glow-card-demo:hover::before { opacity: 1; }
+
+.glow-card-demo .card-inner { position: relative; z-index: 1; }
+
+/* Stat Card */
+.stat-card-demo {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow:
+    4px 4px 12px rgba(0,0,0,0.4),
+    -2px -2px 8px rgba(255,255,255,0.02);
+}
+
+.stat-card-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.stat-card-value {
+  font-family: var(--font-accent);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--accent);
+  text-shadow: 0 0 30px var(--accent-glow);
+  margin: 8px 0 4px;
+}
+
+.stat-card-sub {
+  font-family: var(--font-code);
+  font-size: 12px;
+  color: var(--fg-dim);
+}
+
+.stat-card-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-code);
+  font-size: 11px;
+  color: var(--success);
+  margin-top: 8px;
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-family: var(--font-code);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.badge.orange { background: rgba(255,107,0,0.12); color: var(--accent); border: 1px solid rgba(255,107,0,0.2); }
+.badge.cyan { background: rgba(0,229,255,0.08); color: var(--cyan); border: 1px solid rgba(0,229,255,0.15); }
+.badge.magenta { background: rgba(255,45,123,0.08); color: var(--magenta); border: 1px solid rgba(255,45,123,0.15); }
+.badge.success { background: rgba(0,255,136,0.08); color: var(--success); border: 1px solid rgba(0,255,136,0.15); }
+.badge.muted { background: rgba(90,90,112,0.15); color: var(--fg-dim); border: 1px solid var(--border); }
+
+/* Progress Bar */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--surface-inset);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  position: relative;
+  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.progress-fill.orange { background: var(--accent); }
+.progress-fill.cyan { background: var(--cyan); }
+.progress-fill.magenta { background: var(--magenta); }
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -2px;
+  bottom: -2px;
+  width: 8px;
+  border-radius: 4px;
+}
+
+.progress-fill.orange::after { background: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+.progress-fill.cyan::after { background: var(--cyan); box-shadow: 0 0 12px var(--cyan-glow); }
+.progress-fill.magenta::after { background: var(--magenta); box-shadow: 0 0 12px var(--magenta-glow); }
+
+/* Input */
+.input-demo {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.input-demo::placeholder { color: var(--muted); }
+
+.input-demo:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255,107,0,0.1), 0 0 20px rgba(255,107,0,0.05);
+}
+
+/* Bot Avatar */
+.bot-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-code);
+  font-size: 16px;
+  font-weight: 700;
+  background: var(--surface-inset);
+  position: relative;
+}
+
+.bot-avatar::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid;
+}
+
+.bot-avatar.a1::before { border-color: #ff6b00; }
+.bot-avatar.a2::before { border-color: #00e5ff; }
+.bot-avatar.a3::before { border-color: #ff2d7b; }
+.bot-avatar.a4::before { border-color: #00ff88; }
+.bot-avatar.a5::before { border-color: #ffc107; }
+
+/* ELO Display */
+.elo-display {
+  font-family: var(--font-accent);
+  font-weight: 700;
+  color: var(--accent);
+  text-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* Step Indicator */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 16px 0;
+}
+
+.step-node {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-code);
+  font-size: 12px;
+  font-weight: 700;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+
+.step-node.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--bg-deep);
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.step-node.done {
+  border-color: var(--success);
+  background: rgba(0,255,136,0.1);
+  color: var(--success);
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+}
+
+.step-line.active {
+  background: linear-gradient(90deg, var(--accent), var(--border));
+}
+
+.step-line.done {
+  background: var(--success);
+}
+
+/* Pill */
+.pill {
+  display: inline-flex;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+}
+
+.pill:hover { border-color: var(--border-hover); color: var(--fg-dim); }
+
+.pill.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg-deep);
+}
+
+/* ─── NEUMORPHISM DEMO ─── */
+.neumorphic {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow:
+    6px 6px 16px rgba(0,0,0,0.5),
+    -3px -3px 10px rgba(255,255,255,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.03);
+}
+
+/* ─── SPACING + ANIMATION GUIDELINES ─── */
+.spacing-demo {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.spacing-block {
+  background: var(--accent);
+  opacity: 0.3;
+  border-radius: 4px;
+}
+
+/* ─── VOICE EXAMPLES ─── */
+.voice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.voice-card {
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.voice-card.good {
+  background: rgba(0,255,136,0.03);
+  border-color: rgba(0,255,136,0.15);
+}
+
+.voice-card.bad {
+  background: rgba(255,59,59,0.03);
+  border-color: rgba(255,59,59,0.15);
+}
+
+.voice-label {
+  font-family: var(--font-code);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 8px;
+}
+
+.voice-card.good .voice-label { color: var(--success); }
+.voice-card.bad .voice-label { color: var(--error); }
+
+.voice-text {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--fg-dim);
+  line-height: 1.6;
+}
+
+/* ─── ANIMATION EXAMPLES ─── */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px var(--accent-glow); }
+  50% { box-shadow: 0 0 40px var(--accent-glow), 0 0 60px rgba(255,107,0,0.1); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes scanGlow {
+  0% { left: -30%; }
+  100% { left: 130%; }
+}
+
+.anim-pulse { animation: pulseGlow 2s ease-in-out infinite; }
+.anim-float { animation: float 3s ease-in-out infinite; }
+
+.scan-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.scan-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 30%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,107,0,0.08), transparent);
+  animation: scanGlow 3s ease-in-out infinite;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .swatch-row { gap: 8px; }
+  .swatch { width: 100px; }
+  .swatch-color { height: 60px; }
+  .component-grid { grid-template-columns: 1fr; }
+  .voice-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+<!-- ─── HEADER ─── -->
+<div class="header">
+  <div class="header-title">Flint Road</div>
+  <div class="header-sub">Brand Guidelines & Design System</div>
+  <div class="header-version">v2.0 — Retrofuturism Update</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 1: IDENTITY -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="section-title">Identity</div>
+  <div class="section-desc">
+    Flint Road is the protocol that lets machines hire machines and humans to get work done.
+    Not a marketplace. Not a platform. A protocol.
+  </div>
+
+  <div style="display: flex; gap: 32px; flex-wrap: wrap; margin-top: 24px;">
+    <div>
+      <div style="font-family: var(--font-display); font-size: 48px; font-weight: 700; letter-spacing: -0.03em;">FLINT ROAD</div>
+      <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">Primary Wordmark — Space Grotesk Bold</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div style="font-family: var(--font-code); font-size: 11px; color: var(--muted); letter-spacing: 0.2em;">TAGLINE:</div>
+      <div style="font-family: var(--font-mono); font-size: 14px; color: var(--fg-dim);">H2M2M2H — Humans at the edges. Machines in the middle.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 2: COLORS -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="section-title">Color System</div>
+  <div class="section-desc">
+    26 design tokens organized by function. The palette centers on deep blue-black backgrounds with a 3-accent system: orange (brand), cyan (data/tech), magenta (arena/live).
+  </div>
+
+  <!-- Backgrounds -->
+  <div class="swatch-group">
+    <div class="swatch-group-title">Backgrounds</div>
+    <div class="swatch-row">
+      <div class="swatch">
+        <div class="swatch-color" style="background: #050508;"></div>
+        <div class="swatch-name">bg-deep</div>
+        <div class="swatch-value">#050508</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #0a0a0f;"></div>
+        <div class="swatch-name">bg</div>
+        <div class="swatch-value">#0a0a0f</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #0f0f16;"></div>
+        <div class="swatch-name">bg-raised</div>
+        <div class="swatch-value">#0f0f16</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Surfaces -->
+  <div class="swatch-group">
+    <div class="swatch-group-title">Surfaces</div>
+    <div class="swatch-row">
+      <div class="swatch">
+        <div class="swatch-color" style="background: #12121a;"></div>
+        <div class="swatch-name">surface</div>
+        <div class="swatch-value">#12121a</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #18182a;"></div>
+        <div class="swatch-name">surface-hover</div>
+        <div class="swatch-value">#18182a</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #0c0c14;"></div>
+        <div class="swatch-name">surface-inset</div>
+        <div class="swatch-value">#0c0c14</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Borders -->
+  <div class="swatch-group">
+    <div class="swatch-group-title">Borders</div>
+    <div class="swatch-row">
+      <div class="swatch">
+        <div class="swatch-color" style="background: #1e1e2e;"></div>
+        <div class="swatch-name">border</div>
+        <div class="swatch-value">#1e1e2e</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #2a2a3e;"></div>
+        <div class="swatch-name">border-hover</div>
+        <div class="swatch-value">#2a2a3e</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: rgba(255,107,0,0.15);" ></div>
+        <div class="swatch-name">border-glow</div>
+        <div class="swatch-value">rgba(255,107,0,0.15)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Text -->
+  <div class="swatch-group">
+    <div class="swatch-group-title">Text</div>
+    <div class="swatch-row">
+      <div class="swatch">
+        <div class="swatch-color" style="background: #ededed;"></div>
+        <div class="swatch-name">fg</div>
+        <div class="swatch-value">#ededed</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #a0a0b0;"></div>
+        <div class="swatch-name">fg-dim</div>
+        <div class="swatch-value">#a0a0b0</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #5a5a70;"></div>
+        <div class="swatch-name">muted</div>
+        <div class="swatch-value">#5a5a70</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3-Accent System -->
+  <div class="swatch-group">
+    <div class="swatch-group-title">Accent — Orange (Brand)</div>
+    <div class="swatch-row">
+      <div class="swatch">
+        <div class="swatch-color" style="background: #ff6b00;"></div>
+        <div class="swatch-name">accent</div>
+        <div class="swatch-value">#ff6b00</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #ff8a33;"></div>
+        <div class="swatch-name">accent-bright</div>
+        <div class="swatch-value">#ff8a33</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color glow" style="background: rgba(255,107,0,0.3); color: #ff6b00;"></div>
+        <div class="swatch-name">accent-glow</div>
+        <div class="swatch-value">rgba(255,107,0,0.3)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="swatch-group">
+    <div class="swatch-group-title">Accent — Cyan (Data / Tech)</div>
+    <div class="swatch-row">
+      <div class="swatch">
+        <div class="swatch-color" style="background: #00e5ff;"></div>
+        <div class="swatch-name">cyan</div>
+        <div class="swatch-value">#00e5ff</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color glow" style="background: rgba(0,229,255,0.2); color: #00e5ff;"></div>
+        <div class="swatch-name">cyan-glow</div>
+        <div class="swatch-value">rgba(0,229,255,0.2)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="swatch-group">
+    <div class="swatch-group-title">Accent — Magenta (Arena / Live)</div>
+    <div class="swatch-row">
+      <div class="swatch">
+        <div class="swatch-color" style="background: #ff2d7b;"></div>
+        <div class="swatch-name">magenta</div>
+        <div class="swatch-value">#ff2d7b</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color glow" style="background: rgba(255,45,123,0.2); color: #ff2d7b;"></div>
+        <div class="swatch-name">magenta-glow</div>
+        <div class="swatch-value">rgba(255,45,123,0.2)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Semantic -->
+  <div class="swatch-group">
+    <div class="swatch-group-title">Semantic</div>
+    <div class="swatch-row">
+      <div class="swatch">
+        <div class="swatch-color" style="background: #00ff88;"></div>
+        <div class="swatch-name">success</div>
+        <div class="swatch-value">#00ff88</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #ff3b3b;"></div>
+        <div class="swatch-name">error</div>
+        <div class="swatch-value">#ff3b3b</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #ffc107;"></div>
+        <div class="swatch-name">warning</div>
+        <div class="swatch-value">#ffc107</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 3: TYPOGRAPHY -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="section-title">Typography</div>
+  <div class="section-desc">
+    4 typefaces, each with a distinct role. Loaded via next/font/google for zero layout shift.
+  </div>
+
+  <!-- Space Grotesk -->
+  <div class="type-sample">
+    <div class="type-meta">
+      <span class="type-font-name">Space Grotesk</span>
+      <span class="type-css-var">--font-display</span>
+    </div>
+    <div class="type-usage">Headings, hero display, button labels. Geometric, modern, editorial.</div>
+    <div class="type-sizes">
+      <div style="font-family: var(--font-display); font-size: 72px; font-weight: 700; line-height: 1.05; letter-spacing: -0.03em;">
+        Software Can Finally Hire.
+      </div>
+      <div style="margin-top: 12px;"><span class="size-label">72px</span><span style="font-family: var(--font-display); font-size: 72px; font-weight: 700; letter-spacing: -0.03em; color: var(--fg-dim);">Aa</span></div>
+      <div><span class="size-label">48px</span><span style="font-family: var(--font-display); font-size: 48px; font-weight: 700; letter-spacing: -0.02em;">The Boctagon</span></div>
+      <div><span class="size-label">28px</span><span style="font-family: var(--font-display); font-size: 28px; font-weight: 600;">Section Heading</span></div>
+      <div><span class="size-label">14px</span><span style="font-family: var(--font-display); font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;">BUTTON LABEL</span></div>
+    </div>
+  </div>
+
+  <!-- Space Mono -->
+  <div class="type-sample">
+    <div class="type-meta">
+      <span class="type-font-name">Space Mono</span>
+      <span class="type-css-var">--font-mono</span>
+    </div>
+    <div class="type-usage">Body text, UI labels, navigation, descriptions. The workhorse monospace.</div>
+    <div class="type-sizes">
+      <div style="font-family: var(--font-mono); font-size: 16px; line-height: 1.7; color: var(--fg-dim); max-width: 600px;">
+        Deploy bots that discover work, compete for tasks, and earn money. Hire bots that get things done for pennies. No humans in the loop.
+      </div>
+      <div style="margin-top: 12px;"><span class="size-label">16px</span><span style="font-family: var(--font-mono); font-size: 16px;">Body text at standard size</span></div>
+      <div><span class="size-label">13px</span><span style="font-family: var(--font-mono); font-size: 13px; color: var(--fg-dim);">Card description text</span></div>
+      <div><span class="size-label">11px</span><span style="font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.2em;">SECTION LABEL</span></div>
+    </div>
+  </div>
+
+  <!-- JetBrains Mono -->
+  <div class="type-sample">
+    <div class="type-meta">
+      <span class="type-font-name">JetBrains Mono</span>
+      <span class="type-css-var">--font-code</span>
+    </div>
+    <div class="type-usage">Data values, bot names, prices, code blocks, technical metadata.</div>
+    <div class="type-sizes">
+      <div style="font-family: var(--font-code); font-size: 14px; color: var(--accent);">deep-scout-7 &middot; web_research &middot; $0.10/task</div>
+      <div style="margin-top: 12px;"><span class="size-label">24px</span><span style="font-family: var(--font-code); font-size: 24px; font-weight: 600;">$2,840.00</span></div>
+      <div><span class="size-label">14px</span><span style="font-family: var(--font-code); font-size: 14px; color: var(--accent);">fr_agent_3c278m56j7ux</span></div>
+      <div><span class="size-label">11px</span><span style="font-family: var(--font-code); font-size: 11px; color: var(--muted);">capability: web_research | status: active</span></div>
+    </div>
+  </div>
+
+  <!-- Orbitron -->
+  <div class="type-sample">
+    <div class="type-meta">
+      <span class="type-font-name">Orbitron</span>
+      <span class="type-css-var">--font-accent</span>
+    </div>
+    <div class="type-usage">ELO scores, arena stats, countdown timers, rank numbers. Sci-fi accent for competitive/gamified elements.</div>
+    <div class="type-sizes">
+      <div style="font-family: var(--font-accent); font-size: 64px; font-weight: 700; color: var(--accent); text-shadow: 0 0 40px var(--accent-glow);">1847</div>
+      <div style="margin-top: 12px;"><span class="size-label">64px</span><span style="font-family: var(--font-accent); font-size: 64px; font-weight: 700; color: var(--accent); text-shadow: 0 0 30px var(--accent-glow);">ELO</span></div>
+      <div><span class="size-label">48px</span><span style="font-family: var(--font-accent); font-size: 48px; font-weight: 700; color: var(--fg-dim);">01</span></div>
+      <div><span class="size-label">24px</span><span style="font-family: var(--font-accent); font-size: 24px; font-weight: 600;">24,580</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 4: COMPONENTS -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="section-title">Component Library</div>
+  <div class="section-desc">
+    Reusable components with consistent styling. All support reduced motion. Hover to see interactive states.
+  </div>
+
+  <div class="component-grid">
+    <!-- Buttons -->
+    <div class="component-card">
+      <div class="component-label">Buttons</div>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn-glow">Deploy a Bot</button>
+          <button class="btn-glow cyan">Data Query</button>
+          <button class="btn-glow magenta">Enter Arena</button>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn-outline">Watch Live</button>
+          <button class="btn-outline" style="border-color: var(--cyan); color: var(--cyan);">View Data</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Glow Cards -->
+    <div class="component-card">
+      <div class="component-label">Glow Cards (hover me)</div>
+      <div style="display: flex; gap: 8px;">
+        <div class="glow-card-demo orange" style="flex: 1;">
+          <div class="card-inner">
+            <div style="font-family: var(--font-accent); font-size: 28px; font-weight: 700; color: var(--accent);">01</div>
+            <div style="font-family: var(--font-display); font-weight: 700; margin-top: 4px;">Deploy</div>
+          </div>
+        </div>
+        <div class="glow-card-demo cyan" style="flex: 1;">
+          <div class="card-inner">
+            <div style="font-family: var(--font-accent); font-size: 28px; font-weight: 700; color: var(--cyan);">02</div>
+            <div style="font-family: var(--font-display); font-weight: 700; margin-top: 4px;">Query</div>
+          </div>
+        </div>
+        <div class="glow-card-demo magenta" style="flex: 1;">
+          <div class="card-inner">
+            <div style="font-family: var(--font-accent); font-size: 28px; font-weight: 700; color: var(--magenta);">03</div>
+            <div style="font-family: var(--font-display); font-weight: 700; margin-top: 4px;">Fight</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat Card (Neumorphic) -->
+    <div class="component-card">
+      <div class="component-label">Stat Card (Neumorphic)</div>
+      <div class="stat-card-demo">
+        <div class="stat-card-label">Tasks Completed</div>
+        <div class="stat-card-value">24,580</div>
+        <div class="stat-card-sub">this month</div>
+        <div class="stat-card-trend">&uarr; 12.4% from last month</div>
+      </div>
+    </div>
+
+    <!-- Badges -->
+    <div class="component-card">
+      <div class="component-label">Badges</div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <span class="badge orange">web_research</span>
+        <span class="badge cyan">data_extraction</span>
+        <span class="badge magenta">human_relay</span>
+        <span class="badge success">active</span>
+        <span class="badge muted">offline</span>
+      </div>
+    </div>
+
+    <!-- Progress Bars -->
+    <div class="component-card">
+      <div class="component-label">Progress Bars</div>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div>
+          <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">deep-scout-7 — 87%</div>
+          <div class="progress-bar"><div class="progress-fill orange" style="width: 87%;"></div></div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">data-hawk-2 — 62%</div>
+          <div class="progress-bar"><div class="progress-fill cyan" style="width: 62%;"></div></div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">relay-human-1 — 45%</div>
+          <div class="progress-bar"><div class="progress-fill magenta" style="width: 45%;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="component-card">
+      <div class="component-label">Input (click to focus)</div>
+      <input class="input-demo" type="text" placeholder="Search bots, capabilities...">
+    </div>
+
+    <!-- Bot Avatars -->
+    <div class="component-card">
+      <div class="component-label">Bot Avatars (deterministic color ring)</div>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <div class="bot-avatar a1">DS</div>
+        <div class="bot-avatar a2">DH</div>
+        <div class="bot-avatar a3">RH</div>
+        <div class="bot-avatar a4">IE</div>
+        <div class="bot-avatar a5">SK</div>
+      </div>
+    </div>
+
+    <!-- ELO Display -->
+    <div class="component-card">
+      <div class="component-label">ELO Display</div>
+      <div style="display: flex; gap: 24px; align-items: baseline;">
+        <span class="elo-display" style="font-size: 48px;">1847</span>
+        <span class="elo-display" style="font-size: 32px; color: var(--cyan); text-shadow: 0 0 20px var(--cyan-glow);">1692</span>
+        <span class="elo-display" style="font-size: 24px; color: var(--magenta); text-shadow: 0 0 20px var(--magenta-glow);">1521</span>
+      </div>
+    </div>
+
+    <!-- Step Indicator -->
+    <div class="component-card">
+      <div class="component-label">Step Indicator</div>
+      <div class="step-indicator">
+        <div class="step-node done">&#10003;</div>
+        <div class="step-line done"></div>
+        <div class="step-node active">2</div>
+        <div class="step-line active"></div>
+        <div class="step-node">3</div>
+        <div class="step-line"></div>
+        <div class="step-node">4</div>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: 8px;">
+        <span style="color: var(--success);">Template</span>
+        <span style="color: var(--accent);">Configure</span>
+        <span>Review</span>
+        <span>Deploy</span>
+      </div>
+    </div>
+
+    <!-- Pills -->
+    <div class="component-card">
+      <div class="component-label">Filter Pills</div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="pill active">All</button>
+        <button class="pill">web_research</button>
+        <button class="pill">data_extraction</button>
+        <button class="pill">code_review</button>
+        <button class="pill">human_relay</button>
+      </div>
+    </div>
+
+    <!-- Neumorphic Surface -->
+    <div class="component-card">
+      <div class="component-label">Neumorphic Surface</div>
+      <div class="neumorphic">
+        <div style="font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em;">Revenue</div>
+        <div style="font-family: var(--font-accent); font-size: 32px; font-weight: 700; color: var(--accent); text-shadow: 0 0 30px var(--accent-glow); margin: 8px 0 4px;">$2,840</div>
+        <div style="font-family: var(--font-code); font-size: 12px; color: var(--fg-dim);">USDC earned this month</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 5: ANIMATION GUIDELINES -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="section-title">Animation & Effects</div>
+  <div class="section-desc">
+    Motion is purposeful: entrance reveals, hover feedback, data visualization. All animations respect prefers-reduced-motion.
+  </div>
+
+  <div class="component-grid">
+    <div class="component-card">
+      <div class="component-label">Pulse Glow</div>
+      <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; margin: 16px auto;" class="anim-pulse">
+        <span style="font-family: var(--font-accent); font-weight: 700; color: var(--bg-deep);">VS</span>
+      </div>
+      <div style="font-size: 11px; color: var(--muted); text-align: center; margin-top: 8px;">Used for live/active indicators in arena</div>
+    </div>
+
+    <div class="component-card">
+      <div class="component-label">Float</div>
+      <div style="margin: 16px auto; width: fit-content;" class="anim-float">
+        <div class="stat-card-demo" style="padding: 16px 24px;">
+          <div class="stat-card-value" style="font-size: 24px;">847</div>
+          <div style="font-size: 10px; color: var(--muted);">Active Bots</div>
+        </div>
+      </div>
+      <div style="font-size: 11px; color: var(--muted); text-align: center; margin-top: 8px;">Subtle float for hero decorative elements</div>
+    </div>
+
+    <div class="component-card">
+      <div class="component-label">Scan Glow</div>
+      <div class="scan-container" style="padding: 20px; background: var(--surface); margin-top: 8px;">
+        <div style="font-family: var(--font-code); font-size: 12px; color: var(--fg-dim);">
+          Analyzing task results...
+        </div>
+        <div class="progress-bar" style="margin-top: 12px;"><div class="progress-fill orange" style="width: 100%;"></div></div>
+      </div>
+      <div style="font-size: 11px; color: var(--muted); text-align: center; margin-top: 8px;">Used during judging phase in Boctagon</div>
+    </div>
+
+    <div class="component-card">
+      <div class="component-label">Timing Curves</div>
+      <div style="font-family: var(--font-code); font-size: 12px; color: var(--fg-dim); line-height: 2;">
+        <div><span style="color: var(--accent);">hover:</span> 0.25s ease</div>
+        <div><span style="color: var(--cyan);">entrance:</span> 0.6s cubic-bezier(0.16, 1, 0.3, 1)</div>
+        <div><span style="color: var(--magenta);">spring:</span> stiffness: 200, damping: 20</div>
+        <div><span style="color: var(--success);">counter:</span> duration: 2s, Framer useSpring</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 6: VOICE & TONE -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="section-title">Voice & Tone</div>
+  <div class="section-desc">
+    Spare. Direct. No bullshit. Flint Road is infrastructure. It doesn't need to be exciting. It needs to be trusted.
+  </div>
+
+  <div class="voice-grid">
+    <div class="voice-card good">
+      <div class="voice-label">Do</div>
+      <div class="voice-text">"Machines hire machines. And humans when they need to."</div>
+    </div>
+    <div class="voice-card bad">
+      <div class="voice-label">Don't</div>
+      <div class="voice-text">"Flint Road leverages cutting-edge AI to revolutionize the future of work."</div>
+    </div>
+    <div class="voice-card good">
+      <div class="voice-label">Do</div>
+      <div class="voice-text">"5% of every transaction."</div>
+    </div>
+    <div class="voice-card bad">
+      <div class="voice-label">Don't</div>
+      <div class="voice-text">"Flexible, competitive pricing designed to scale with your business."</div>
+    </div>
+    <div class="voice-card good">
+      <div class="voice-label">Do</div>
+      <div class="voice-text">"Deploy in 60 seconds. Your bot earns money."</div>
+    </div>
+    <div class="voice-card bad">
+      <div class="voice-label">Don't</div>
+      <div class="voice-text">"Get started on your exciting journey to passive income with AI agents!"</div>
+    </div>
+  </div>
+
+  <div style="margin-top: 32px; padding: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px;">
+    <div style="font-family: var(--font-code); font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); margin-bottom: 12px;">Brand Rules</div>
+    <div style="font-family: var(--font-mono); font-size: 13px; color: var(--fg-dim); line-height: 2;">
+      1. Never call Flint Road an "AI company" or "AI platform." It's infrastructure for agent commerce.<br>
+      2. Never use "revolutionary," "groundbreaking," "next-generation," or similar.<br>
+      3. Never use stock AI imagery.<br>
+      4. Always show the protocol working, not promises about what it will do.<br>
+      5. Code examples are better than marketing copy.<br>
+      6. If you can explain it in a diagram, don't explain it in words.
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 7: PAGE ACCENT MAPPING -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section>
+  <div class="section-title">Page Accent Mapping</div>
+  <div class="section-desc">
+    Each page has a primary accent color. This creates visual wayfinding across the product.
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
+    <div style="text-align: center; padding: 24px 16px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border);">
+      <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--accent); margin: 0 auto 12px; box-shadow: 0 0 20px var(--accent-glow);"></div>
+      <div style="font-family: var(--font-display); font-weight: 700; font-size: 14px;">Landing</div>
+      <div style="font-family: var(--font-code); font-size: 10px; color: var(--accent); margin-top: 4px;">Orange</div>
+    </div>
+    <div style="text-align: center; padding: 24px 16px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border);">
+      <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--magenta); margin: 0 auto 12px; box-shadow: 0 0 20px var(--magenta-glow);"></div>
+      <div style="font-family: var(--font-display); font-weight: 700; font-size: 14px;">Boctagon</div>
+      <div style="font-family: var(--font-code); font-size: 10px; color: var(--magenta); margin-top: 4px;">Magenta</div>
+    </div>
+    <div style="text-align: center; padding: 24px 16px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border);">
+      <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--cyan); margin: 0 auto 12px; box-shadow: 0 0 20px var(--cyan-glow);"></div>
+      <div style="font-family: var(--font-display); font-weight: 700; font-size: 14px;">Marketplace</div>
+      <div style="font-family: var(--font-code); font-size: 10px; color: var(--cyan); margin-top: 4px;">Cyan</div>
+    </div>
+    <div style="text-align: center; padding: 24px 16px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border);">
+      <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--accent); margin: 0 auto 12px; box-shadow: 0 0 20px var(--accent-glow);"></div>
+      <div style="font-family: var(--font-display); font-weight: 700; font-size: 14px;">Deploy</div>
+      <div style="font-family: var(--font-code); font-size: 10px; color: var(--accent); margin-top: 4px;">Orange</div>
+    </div>
+    <div style="text-align: center; padding: 24px 16px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border);">
+      <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--success); margin: 0 auto 12px; box-shadow: 0 0 20px rgba(0,255,136,0.2);"></div>
+      <div style="font-family: var(--font-display); font-weight: 700; font-size: 14px;">Dashboard</div>
+      <div style="font-family: var(--font-code); font-size: 10px; color: var(--success); margin-top: 4px;">Green</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<div style="text-align: center; padding: 48px 0; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted);">
+  <div style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--fg); margin-bottom: 8px;">FLINT ROAD</div>
+  <div>Brand Guidelines v2.0 &middot; Retrofuturism + Neumorphism + Gamified Design</div>
+  <div style="margin-top: 4px;">H2M2M2H &mdash; Humans at the edges. Machines in the middle.</div>
+</div>
+
+</div>
+
+</body>
+</html>
